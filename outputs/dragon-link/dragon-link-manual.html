@@ -4522,7 +4522,9 @@ three/build/three.module.js:
     btn && (btn.disabled = true); signinNote('Opening sign-in…');
     try {
       const api = await loadPrivy();
-      for (let i = 0; i < 50 && !api.ready; i++) await new Promise(r => setTimeout(r, 100));
+      // the sign-in module is large: wait for it to be ready (up to 30 s) before opening the window
+      for (let i = 0; i < 300 && !api.ready; i++) await new Promise(r => setTimeout(r, 100));
+      if (!api.ready) throw new Error('not ready');
       api.login(opts); signinNote('');
     } catch (e) { console.warn('Privy', e); signinNote('Sign-in is not available right now. Play as a guest.'); }
     btn && (btn.disabled = false);

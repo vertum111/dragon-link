@@ -16,20 +16,28 @@ Built for the NEAR Hackathon, track **Games With Real Economies**.
 ## On NEAR
 
 - `items.dragonlink.testnet` — a NEP-245 multi-token contract (Rust, `contracts/items`): coins, fish, embers and pearls.
-- Every trade with a merchant needs an ed25519-signed quote that the contract verifies before it settles.
-- Players never see a wallet: signing in creates a NEAR account behind the scenes, and every move is relayed as a NEP-366 meta-transaction by the game server (`server/`).
-- Offers between players are held in escrow by the contract (`offer_create` / `offer_accept` / `offer_cancel`).
+- **Sign in with Google or email (Privy).** No seed phrase, no wallet pop-up, no gas prompt. Privy gives each player an embedded NEAR wallet; its key becomes the access key of the player's game account (`name-xxxx.dragonlink.testnet`), so the same Google or email opens the same dragon on any device. Guests get a key kept in their browser. Same pattern as [near-examples/hello-privy](https://github.com/near-examples/hello-privy).
+- **Gas is on the game.** Players sign NEP-366 meta-transactions; the game server relays them to the items contract and pays the gas.
+- Every trade with a merchant needs an ed25519-signed quote that the contract verifies before it settles, so the server can't move a player's tokens.
+- Offers between players are held in escrow by the contract (`offer_create` / `offer_accept` / `offer_cancel`). Robo, the club bot, has its own wallet and answers offers by today's street prices.
 
 ## Play
 
-- **Hosted demo (static):** the Netlify link in the repo description. Without the game server the market runs locally in your browser, so everything except on-chain settlement works.
-- **Full on-chain mode, locally:**
+**https://dragonlink.lol** — the full game on NEAR testnet: sign in with Google or email (or play as a guest), and every coin, fish, ember and pearl is on-chain.
+
+The site is static plus one Netlify function, `netlify/functions/api.mjs` (`/api/*`): accounts, merchant quotes, rewards, the meta-transaction relay, Robo and LINK rooms. Market state lives in Netlify Blobs. It needs three secret environment variables: `ROOT_PRIVATE_KEY` (dragonlink.testnet), `MERCHANT_KEYS` (JSON of the merchants' quote-signing keys) and `BOT_PRIVATE_KEY`.
+
+Run it yourself:
 
 ```bash
+npm install
+npm run build                  # esbuild → outputs/dragon-link/dragon-link-manual.html + privy.bundle.js
 cd server && npm install
-node setup.mjs     # one time: creates the testnet accounts and deploys the contract (needs a funded testnet key)
-node index.mjs     # serves the game on http://localhost:8787 with the NEAR relay
+node setup.mjs                 # one time: testnet accounts + contract (needs a funded testnet key)
+node index.mjs                 # the same server as a local process, on http://localhost:8787
 ```
+
+Without any server (`python3 -m http.server` in `outputs/dragon-link`) the market runs in the browser and everything except on-chain settlement works.
 
 Controls: ◀ ● ▶ on the console, or `A S D` / arrow keys + Enter. The friend's unit uses `J K L` while linked.
 
@@ -42,7 +50,9 @@ Controls: ◀ ● ▶ on the console, or `A S D` / arrow keys + Enter. The frien
 | `work/dragon-ui-manual.js`, `work/dragon-duo-alt.html` | Page UI: sign-in, market panel, LINK menu, trade, tour, settings |
 | `work/economy/` | Market engine: merchants, pricing, events, investors, week simulation |
 | `work/chain/bridge.js` | Mirrors the local market to the NEAR contract |
-| `server/` | Game server: market authority, quote signing, meta-transaction relay, rooms, Robo |
+| `netlify/functions/api.mjs` | The game server on Netlify: accounts, quotes, rewards, relay, Robo, rooms |
+| `work/privy.js` | Google / email sign-in with an embedded NEAR wallet (Privy) |
+| `server/` | The same game server as a local Node process |
 | `contracts/items/` | NEP-245 items contract with signed trades and escrow offers |
 | `work/qa/playthrough.js` | In-browser end-to-end playthrough |
 

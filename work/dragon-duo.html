@@ -1,0 +1,152 @@
+<!doctype html><html lang="en" data-edition="kiln"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dragon Link · Ember Club</title>
+<style>
+/* fonts are subset to the glyphs this page uses and inlined, so the demo works offline */
+__FONTS_CSS__/* ── Pack-art palette: the page speaks the same language as the blister cards ── */
+:root{
+  --paper:#f3e7cb;--paper-hi:#fbf4e2;--ink:#1c1d4b;--ink-soft:#4a4870;
+  --cobalt:#2443a8;--cobalt-d:#172f7d;--red:#d8352a;--red-d:#8f1f19;--red-t:#b3261d;--yellow:#f8d23b;--orange:#f39a3d;
+  --lcd:#c6cf9f;--lcd-ink:#2c3a1d;
+  --ed:#d8352a;--ed-soft:#f6cdbb;--ed-ink:#fff;
+  --check:repeating-conic-gradient(var(--ink) 0 25%,var(--paper-hi) 0 50%) 0 0/16px 16px;
+  --side:356px;
+}
+[data-edition=ryu]{--ed:#157256;--ed-soft:#c3e8d5}
+[data-edition=fossil]{--ed:#8a5526;--ed-soft:#f1dbb2}
+[data-edition=nocturne]{--ed:#6a49b6;--ed-soft:#ddd0f5}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;color:var(--ink);font:500 14px/1.45 Rubik,system-ui,sans-serif;
+  background:var(--paper) radial-gradient(#9d7b4a1c 1px,transparent 1.3px) 0 0/5px 5px}
+.jp,h2,h3{font-family:"Dela Gothic One",Rubik,sans-serif;font-weight:400}
+.mono{font:800 11px/1.2 Rubik,sans-serif;letter-spacing:.04em}
+button{font-family:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;box-shadow:0 0 0 6px var(--yellow)}
+
+/* ── Toy buttons (same chunky keys as the console) ── */
+.key{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:8px 16px;
+  border:2px solid var(--ink);border-radius:999px;background:var(--orange);color:var(--ink);
+  font:800 13px/1 Rubik,sans-serif;cursor:pointer;box-shadow:0 4px 0 var(--ink);transition:transform .08s,box-shadow .08s,background .15s}
+.key:hover{background:var(--yellow)}
+.key:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.key.red{background:var(--red);color:#fff}.key.red:hover{background:#ef4a3c}
+.key.ghost{background:var(--paper-hi)}
+.key:disabled{opacity:.55;cursor:wait;transform:none}
+
+/* ════════════ GAME SCREEN ════════════ */
+.bar{position:fixed;top:0;left:0;right:0;height:60px;display:flex;align-items:center;gap:14px;padding:0 18px 8px;
+  background:var(--cobalt);color:#fff;z-index:3}
+.bar:after{content:'';position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--check)}
+.bar .brand{height:38px;display:flex;align-items:center;background:var(--paper-hi);border:2px solid var(--ink);border-radius:8px;padding:2px 10px}
+.bar .brand img{height:30px;width:auto;display:block}
+.bar .tag{background:var(--yellow);color:var(--ink);border:2px solid var(--ink);border-radius:4px;padding:3px 10px;font-size:12px;transform:rotate(-2deg)}
+.bar .club{margin-left:auto;font:italic 900 22px/1 Rubik;letter-spacing:.01em}
+.bar .club small{font:800 11px Rubik,sans-serif;opacity:.8;margin-left:8px;font-style:normal}
+/* rings behind the console — static CSS, nothing composited over WebGL */
+.stage-bg{position:fixed;top:60px;left:0;bottom:0;right:var(--side);pointer-events:none;
+  background:repeating-radial-gradient(circle at 50% 54%,transparent 0 46px,#ffffff80 46px 48px);
+  -webkit-mask:radial-gradient(circle at 50% 54%,#000 30%,transparent 72%);mask:radial-gradient(circle at 50% 54%,#000 30%,transparent 72%)}
+.stage-bg:before{content:'';position:absolute;left:50%;top:54%;width:min(62vh,640px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:var(--ed-soft);opacity:.75;transition:background .4s}
+.stage-bg:after{content:'KILN';position:absolute;left:26px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;font:400 clamp(60px,8.5vw,128px)/1 'Dela Gothic One';color:transparent;-webkit-text-stroke:2.5px #1c1d4b55;letter-spacing:.02em}
+[data-edition=ryu] .stage-bg:after{content:'RYU'}[data-edition=fossil] .stage-bg:after{content:'FOSSIL'}[data-edition=nocturne] .stage-bg:after{content:'NOCTURNE'}
+#view{position:fixed;top:60px;left:0;bottom:0;right:var(--side);width:calc(100% - var(--side));height:calc(100% - 60px);display:block;touch-action:none;outline:none}
+.side{position:fixed;top:76px;right:16px;bottom:16px;width:calc(var(--side) - 32px);display:flex;flex-direction:column;gap:14px;z-index:2;overflow:auto;padding:2px 6px 6px 2px}
+.panel{background:var(--paper-hi);border:2px solid var(--ink);border-radius:14px;padding:14px;box-shadow:4px 4px 0 var(--ink)}
+.panel h3{margin:-2px 0 10px;display:inline-block;background:var(--ed);color:var(--ed-ink);border:2px solid var(--ink);border-radius:6px;padding:2px 10px;font-size:13px;transition:background .4s}
+.lcd{position:relative;margin:0;padding:12px 14px;min-height:5.2em;border-radius:8px;border:3px solid #4f5638;
+  background:var(--lcd) linear-gradient(#ffffff1f,transparent 40%);color:var(--lcd-ink);
+  box-shadow:inset 0 3px 0 #0000001c;font:400 16px/1.35 DotGothic16,ui-monospace,monospace}
+.lcd:before{content:'▶ ';animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.views{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.views figure{margin:0}
+.views img{display:block;width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border-radius:8px;border:2px solid var(--ink)}
+.views .mono{display:block;margin-top:5px;font-size:10px}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:7px 10px;align-items:center;font-size:13px}
+.keys b{background:#fff;border:2px solid var(--ink);border-bottom-width:4px;border-radius:6px;padding:1px 7px;font:800 12px Rubik;text-align:center;white-space:nowrap}
+.note{font-size:12px;color:var(--ink-soft);margin:10px 0 0}
+@media (max-width:900px){
+  :root{--side:0px}
+  .bar .tag,.bar .club small{display:none}.bar .club{font-size:17px}
+  .side{top:auto;left:10px;right:10px;width:auto;bottom:10px;max-height:36vh}
+  .side .views-panel,.side .keys-panel{display:none}
+  .panel{padding:10px;box-shadow:3px 3px 0 var(--ink)}.panel h3{display:none}
+  .lcd{min-height:0;font-size:14px;padding:8px 10px}.btns{margin-top:8px}.key{min-height:44px;padding:8px 11px;font-size:12.5px;white-space:nowrap}.btns{flex-wrap:nowrap;gap:6px}.btns .key{flex:1 1 auto}.stage-bg:after{display:none}
+  #view,.stage-bg{right:0;width:100%;bottom:150px;height:auto}
+  #view{height:calc(100% - 210px)}
+}
+
+/* ════════════ SHELF (title screen) ════════════ */
+/* the one big moment: an anime iris-out from the shelf into the game */
+#title{position:fixed;inset:0;z-index:9;overflow:auto;clip-path:circle(150% at 36% 50%);transition:clip-path .7s cubic-bezier(.7,0,.3,1),visibility 0s .7s;
+  background:var(--paper) radial-gradient(#9d7b4a1c 1px,transparent 1.3px) 0 0/5px 5px}
+#title.gone{clip-path:circle(0 at 36% 50%);visibility:hidden;pointer-events:none}
+@media (max-width:900px){#title{clip-path:circle(150% at 50% 30%)}#title.gone{clip-path:circle(0 at 50% 30%)}}
+@media (prefers-reduced-motion:reduce){#title{transition:opacity .2s}#title.gone{opacity:0}}
+.panel h3 small{font:800 11px Rubik,sans-serif;opacity:.85;margin-left:4px}
+__COUNTER_CSS__
+.fallback{position:fixed;inset:0;display:grid;place-items:center;padding:24px;text-align:center;background:var(--paper);z-index:10}
+</style>
+
+<div class="bar"><span class="brand"><img src="brand/dragon-link-kana.svg" alt="Dragon Link"></span><span class="tag jp">第2弾 <small>Second edition</small></span><span class="club">EMBER CLUB<small>TOKYO 1998</small></span></div>
+<div class="stage-bg" aria-hidden="true"></div>
+<canvas id="view" inert tabindex="0" aria-label="Dragon Link 3D console. Use the buttons on the console or press A, S, and D."></canvas>
+<aside class="side" inert>
+  <section class="panel"><h3>液晶メッセージ <small>Hint</small></h3><p id="hint" class="lcd" aria-live="polite">Unbox a console to begin.</p>
+    <div class="btns"><button id="link" class="key red">⚡ Link with a friend</button><button id="front" class="key">Front view</button><button id="mute" class="key ghost">♪ ON</button></div></section>
+  <section class="panel views-panel"><h3>外観 <small>Console views</small></h3>
+    <div class="views"><figure><img src="assets/views/back.jpg" alt="Rear view"><span class="mono">Back</span></figure><figure><img src="assets/views/right.jpg" alt="Right side with LINK contacts"><span class="mono">Right, LINK port</span></figure><figure><img src="assets/views/left.jpg" alt="Left side"><span class="mono">Left</span></figure></div>
+    <p class="note">The flat side with three contacts is the magnetic LINK port.</p></section>
+  <section class="panel keys-panel"><h3>操作方法 <small>Controls</small></h3>
+    <div class="keys"><b>A S D</b><span>◀ ● ▶ on your console (or ← Enter →)</span><b>J K L</b><span>your friend’s console while linked</span><b>M</b><span>music</span><b>F</b><span>front view</span><b>Shift+R</b><span>reset progress</span></div>
+    <p class="note">Drag the console to rotate it. Click the side contacts to LINK.</p></section>
+</aside>
+
+<div id="title"><main class="shop-window">
+  <header class="shop-mast">
+    <h1><img class="kana-logo" src="brand/dragon-link-kana.svg" alt="Dragon Link"></h1>
+    <p class="ribbon jp">ポケットドラゴンそだてよう!</p>
+    <div class="mast-right"><button id="shop-guide-link" class="key ghost" type="button">? How to play</button></div>
+  </header>
+  <section id="shelf" aria-labelledby="shelf-title">
+    <div class="display-bay">
+      <div class="pack-stage">
+        <canvas id="pack-view" tabindex="0" aria-label="3D display. Use the arrow keys to browse and Space to flip a package."></canvas>
+        <div id="pack-loader" class="pack-loader" role="status" hidden>
+          <svg viewBox="0 0 256 256" aria-hidden="true"><path d="M24 114C27 73 78 27 128 17c50 10 101 56 104 97h-31l-19 18-27-22-27 24-27-24-27 22-19-18Z"/><path fill-rule="evenodd" d="M24 136h23l27 23 27-23 27 24 27-24 27 23 27-23h23c-2 61-43 103-104 103S26 197 24 136ZM79 177h29l-13 18Zm69 0h29l-16 18Z"/></svg>
+          <span>Loading console…</span>
+        </div>
+        <button type="button" class="pack-arrow" id="pack-prev" aria-label="Previous package">←</button>
+        <button type="button" class="pack-arrow" id="pack-next" aria-label="Next package">→</button>
+      </div>
+      <p class="bay-tag jp" id="pack-meta" aria-live="polite"></p>
+      <span class="burst jp" aria-hidden="true">新発売<br><small>NEW!</small></span>
+      <div class="bay-foot"><span class="pack-help">Drag a package to inspect it</span><button type="button" id="pack-flip" class="key ghost">↻ Flip package</button></div>
+    </div>
+    <div class="counter">
+      <p class="eyebrow jp">ポケットドラゴン 全4種</p>
+      <h2 id="shelf-title">Choose your dragon</h2>
+      <p id="pack-blurb" class="blurb"></p>
+      <div class="pack-tools" aria-label="Console edition">
+        <button type="button" class="pack-tab" data-edition="kiln" aria-pressed="false"><img src="assets/series/kiln.webp" alt=""><span><small class="mono">DL-01</small>KILN</span></button>
+        <button type="button" class="pack-tab" data-edition="ryu" aria-pressed="false"><img src="assets/series/ryu.webp" alt=""><span><small class="mono">DL-02</small>RYU</span></button>
+        <button type="button" class="pack-tab" data-edition="fossil" aria-pressed="false"><img src="assets/series/fossil.webp" alt=""><span><small class="mono">DL-03</small>FOSSIL</span></button>
+        <button type="button" class="pack-tab" data-edition="nocturne" aria-pressed="false"><img src="assets/series/nocturne.webp" alt=""><span><small class="mono">DL-04</small>NOCTURNE</span></button>
+      </div>
+      <div class="shop-actions"><button id="unbox" class="key red">Unbox KILN</button><button id="start" class="key ghost" hidden>Continue game</button></div>
+      <p id="shelf-status" role="status"></p>
+      <img class="guide-strip" src="assets/packaging/guide-panels.webp" alt="1: the egg hatches. 2: raise your dragon. 3: play together." width="642" height="194">
+      <aside class="tip"><span class="avatar" aria-hidden="true"></span><div><b>Hatch your dragon</b><span>The middle button cracks the egg. Find a friend to LINK.</span></div></aside>
+    </div>
+  </section>
+  <footer class="shop-footer"><span>© 1998 Ember Club, Tokyo. Contains small dragons.</span><span>Batteries: LR44 × 2</span></footer>
+  <dialog id="shop-guide">
+    <h2>How to play</h2>
+    <img src="assets/packaging/guide-panels.webp" alt="1: the egg hatches. 2: raise your dragon. 3: play together." width="642" height="194">
+    <p>Unbox your console and press the center button to hatch your dragon. Use the left and right buttons to browse the menu, and the center button to confirm.</p>
+    <p>Drag the console to rotate it. Click the three-contact port on the side to LINK with a friend.</p>
+    <form method="dialog"><button class="key">Back to the display</button></form>
+  </dialog>
+</main></div>
+<div class="fallback" id="fallback" hidden>This browser could not start WebGL. Open the demo in a browser that supports WebGL 2.</div>
+<script>__BUNDLE__</script></html>

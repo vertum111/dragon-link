@@ -1,0 +1,98 @@
+/* Shelf: a toy-shop counter drawn in the blister-card language (cobalt · red · yellow burst · checker). */
+.shop-window{max-width:1320px;min-height:100%;margin:auto;display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding:0 clamp(14px,3vw,40px)}
+.shop-mast{display:flex;align-items:center;gap:18px;padding:16px 0 14px;border-bottom:3px solid var(--ink)}
+.shop-mast h1{width:clamp(190px,22vw,280px);margin:0;flex:none}
+.kana-logo{display:block;width:100%;height:auto}
+.ribbon{margin:0;background:var(--red);color:#fff;padding:7px 22px 7px 18px;font-size:clamp(13px,1.3vw,17px);transform:rotate(-2deg);
+  clip-path:polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%);text-shadow:2px 2px 0 var(--red-d)}
+.mast-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+
+#shelf{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,1fr);gap:clamp(16px,2.4vw,32px);padding:20px 0;min-height:0}
+
+/* display bay: edition-tinted card with print rings and a checkered shelf lip */
+.display-bay{position:relative;isolation:isolate;overflow:hidden;min-height:420px;border:3px solid var(--ink);border-radius:20px;
+  background:repeating-radial-gradient(circle at 50% 47%,transparent 0 54px,#ffffff8c 54px 57px),var(--ed-soft);
+  box-shadow:6px 6px 0 var(--ink);transition:background-color .4s}
+.display-bay:after{content:'';position:absolute;left:0;right:0;bottom:0;height:16px;background:var(--check);border-top:3px solid var(--ink);z-index:1}
+.pack-stage{position:absolute;inset:0 0 16px}
+#pack-view{display:block;width:100%;height:100%;touch-action:none;cursor:grab;outline-offset:-6px}
+#pack-view:active{cursor:grabbing}
+.pack-arrow{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border:2px solid var(--ink);border-radius:50%;
+  background:var(--paper-hi);color:var(--ink);font:800 22px Rubik,sans-serif;cursor:pointer;box-shadow:0 4px 0 var(--ink);z-index:2}
+.pack-arrow:hover{background:var(--yellow)}
+.pack-arrow:active{transform:translateY(calc(-50% + 3px));box-shadow:0 1px 0 var(--ink)}
+#pack-prev{left:16px}#pack-next{right:16px}
+.bay-tag{position:absolute;top:16px;left:16px;margin:0;background:var(--ink);color:#fff;border-radius:6px;padding:5px 12px;font-size:15px;white-space:pre;z-index:2}
+.burst{position:absolute;top:10px;right:14px;width:92px;height:92px;display:grid;place-content:center;text-align:center;z-index:2;
+  background:var(--yellow);color:var(--red);font-size:17px;line-height:1;transform:rotate(10deg);
+  clip-path:polygon(50% 0,59% 14%,75% 6%,76% 24%,93% 25%,85% 40%,100% 50%,85% 60%,93% 75%,76% 76%,75% 94%,59% 86%,50% 100%,41% 86%,25% 94%,24% 76%,7% 75%,15% 60%,0 50%,15% 40%,7% 25%,24% 24%,25% 6%,41% 14%)}
+.burst small{font:900 12px Rubik;color:var(--ink)}
+.bay-foot{position:absolute;left:16px;right:16px;bottom:30px;display:flex;justify-content:space-between;align-items:center;gap:10px;z-index:2;pointer-events:none}
+.bay-foot>*{pointer-events:auto}
+.pack-help{font:700 12px Rubik;color:var(--ink-soft);background:#fffaf0cc;border-radius:999px;padding:4px 10px}
+#pack-flip{min-height:36px;padding:6px 12px;font-size:12px;box-shadow:0 3px 0 var(--ink)}
+
+/* counter column */
+.counter{display:flex;flex-direction:column;gap:14px;min-width:0}
+.eyebrow{margin:4px 0 -6px;color:var(--red-t);font-size:14px}
+.counter h2{margin:0;font-size:clamp(30px,3.2vw,46px);line-height:1;letter-spacing:-.01em}
+.blurb{margin:0;font-size:15px;color:var(--ink-soft);min-height:2.9em}
+.pack-tools{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pack-tab{display:flex;align-items:center;gap:10px;min-height:68px;padding:8px 12px;border:2px solid var(--ink);border-radius:12px;
+  background:var(--paper-hi);color:var(--ink);font:400 17px "Dela Gothic One",sans-serif;text-align:left;cursor:pointer;
+  box-shadow:0 4px 0 var(--ink);transition:transform .08s,box-shadow .08s,background .2s}
+.pack-tab img{width:48px;height:48px;object-fit:contain;flex:none}
+.pack-tab span{display:flex;flex-direction:column}
+.pack-tab small{font-size:10px;color:var(--ink-soft)}
+.pack-tab:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--ink)}
+.pack-tab[data-edition=kiln]{--c:#f6cdbb}.pack-tab[data-edition=ryu]{--c:#c3e8d5}.pack-tab[data-edition=fossil]{--c:#f1dbb2}.pack-tab[data-edition=nocturne]{--c:#ddd0f5}
+.pack-tab[aria-pressed=true]{background:var(--c);transform:translateY(3px);box-shadow:0 1px 0 var(--ink);outline:3px solid var(--ink);outline-offset:-6px}
+.shop-actions{display:flex;gap:10px}
+#unbox{flex:1;min-height:56px;font-size:18px;border-radius:14px;box-shadow:0 5px 0 var(--ink)}
+#start{min-height:56px;border-radius:14px;box-shadow:0 5px 0 var(--ink)}
+#unbox:active,#start:active{box-shadow:0 1px 0 var(--ink)}
+/* returning player: Continue becomes the primary action, Unbox steps back */
+.shop-actions:has(#start:not([hidden])) #start{flex:1;order:-1;background:var(--red);color:#fff;font-size:18px}
+.shop-actions:has(#start:not([hidden])) #unbox{flex:0 1 auto;background:var(--paper-hi);color:var(--ink);font-size:13px}
+#shelf-status{margin:-4px 0 0;color:var(--red-d);font-size:13px;font-weight:700}
+#shelf-status:empty{display:none}
+.guide-strip{display:block;width:100%;height:auto;margin-top:auto;border-radius:12px;border:2px solid var(--ink);background:#f3e2bf}
+.tip{display:flex;align-items:center;gap:14px;padding:12px 14px;border:2px dashed var(--ink);border-radius:14px;background:#fff6dc}
+.tip .avatar{flex:none;width:76px;height:76px;border-radius:50%;border:2px solid var(--ink);background:var(--cobalt) url(assets/packaging/tip-girl.jpg) center/cover}
+.tip p{margin:0;color:var(--red-t)}
+.tip b{display:block;font:400 17px "Dela Gothic One";margin:0 0 2px}
+.tip span{font-size:13px;color:var(--ink-soft)}
+.shop-footer{display:flex;justify-content:space-between;gap:8px;border-top:3px solid var(--ink);padding:10px 0 14px;color:var(--ink-soft);font-size:12px}
+
+#shop-guide{max-width:36em;border:3px solid var(--ink);border-radius:16px;background:var(--paper-hi);color:var(--ink);padding:22px;box-shadow:6px 6px 0 var(--ink)}
+#shop-guide::backdrop{background:#172f7dcc}
+#shop-guide h2{margin-top:0}
+#shop-guide img{display:block;width:100%;height:auto;border-radius:10px}
+
+.pack-loader{position:absolute;z-index:3;inset:0;display:grid;place-content:center;justify-items:center;gap:.65rem;color:var(--ink);background:#fffaf0e6;pointer-events:none;font-weight:800}
+.pack-loader[hidden]{display:none}
+.pack-loader svg{width:4.5rem;height:4.5rem;fill:currentColor;overflow:visible}
+.pack-loader svg path{transform-box:fill-box;transform-origin:center}
+.pack-loader svg path:first-child{animation:hatch-loader-top 1.4s ease-in-out infinite}
+.pack-loader svg path:last-child{animation:hatch-loader-base 1.4s ease-in-out infinite}
+@keyframes hatch-loader-top{0%,17%,78%,100%{transform:translateY(0) rotate(0)}43%,57%{transform:translateY(-21px) rotate(-9deg)}}
+@keyframes hatch-loader-base{0%,17%,78%,100%{transform:translateY(0)}43%,57%{transform:translateY(8px)}}
+
+@media (max-width:900px){
+  .ribbon,.mast-right .mono{display:none}
+  .shop-mast{padding:10px 0}
+  #shelf{grid-template-columns:1fr;padding:12px 0}
+  .display-bay{min-height:0;height:min(48dvh,420px);box-shadow:4px 4px 0 var(--ink)}
+  .burst{width:70px;height:70px;font-size:13px}
+  .pack-help{display:none}
+  .counter h2{font-size:28px}.blurb{min-height:0}
+  .pack-tools{grid-template-columns:repeat(4,1fr);gap:6px}
+  .pack-tab{flex-direction:column;gap:2px;min-height:0;padding:6px 4px;font-size:11px;text-align:center}
+  .pack-tab img{width:34px;height:34px}.pack-tab small{display:none}
+  .pack-tab{min-height:64px}
+  .tip,.guide-strip{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .lcd:before{animation:none}
+  .pack-loader svg path:first-child,.pack-loader svg path:last-child{animation:none}
+}

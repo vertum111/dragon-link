@@ -1,0 +1,8 @@
+# The game is a static page; the NEAR relay server (server/) runs separately.
+[build]
+  publish = "outputs/dragon-link"
+
+[[redirects]]
+  from = "/"
+  to = "/dragon-link-manual.html"
+  status = 200

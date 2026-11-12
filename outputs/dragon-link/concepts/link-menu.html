@@ -1,0 +1,62 @@
+<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Концепт: меню під час лінку</title>
+<style>
+:root{--paper:#e9eae4;--paper-2:#f4f4ef;--sumi:#1d1d1b;--sumi-2:#55554f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--sumi);font:15px/1.55 system-ui,sans-serif;padding:28px clamp(16px,4vw,48px) 60px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:20px;margin:30px 0 6px}
+.lead{color:var(--sumi-2);margin:0 0 18px;max-width:72ch}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--paper-2);border:1.5px solid var(--sumi);border-radius:6px;padding:12px;max-width:1100px}
+.pair canvas{display:block;width:100%;height:auto;border-radius:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;max-width:1100px}
+.card{background:var(--paper-2);border:1.5px solid var(--sumi);border-radius:6px;padding:10px 12px}
+.card canvas{display:block;width:100%;border-radius:4px;margin-bottom:6px}
+.card b{display:block}
+.card p{margin:2px 0 0;color:var(--sumi-2);font-size:14px}
+</style>
+<h1>Меню під час лінку</h1>
+<p class="lead">Поки дві консолі з’єднані, годувати й гуляти немає сенсу, тому нижнє меню на обох консолях замінюється на чотири дії для двох гравців. Після UNLINK повертається звичайне меню. Нижче приклад на справжньому LCD: ліворуч ваша консоль (вибрано BOSS), праворуч консоль друга.</p>
+<div class="pair"><canvas id="l" width="720" height="544"></canvas><canvas id="r" width="720" height="544"></canvas></div>
+<h2>Чотири пункти</h2>
+<div class="grid">
+  <div class="card"><canvas data-i="0" width="200" height="120"></canvas><b>BOSS</b><p>Разом проти Тіньового Вірма (нинішня битва). Нагорода: монети, іноді Pearl.</p></div>
+  <div class="card"><canvas data-i="1" width="200" height="120"></canvas><b>TRADE</b><p>Відкриває обмін предметами з другом (діалог на сторінці).</p></div>
+  <div class="card"><canvas data-i="2" width="200" height="120"></canvas><b>GIFT</b><p>Подарувати другу одну рибу з сумки — його дракон одразу наїсться. Швидкий спосіб допомогти без торгу.</p></div>
+  <div class="card"><canvas data-i="3" width="200" height="120"></canvas><b>UNLINK</b><p>Роз’єднатися і повернутися до звичайного меню.</p></div>
+</div>
+<script>
+const pal={bg:'#c4c58e',bg2:'#b0b17c',mid:'#999b6c',ink:'#0b0d06',muted:'#6f7249'};
+const F='"DotGothic16","Courier New",monospace';
+const t=(g,s,x,y,size,c=pal.ink,a='center')=>{g.font=`bold ${size}px ${F}`;g.textAlign=a;g.fillStyle=c;g.fillText(s,x,y)};
+// link-mode icons, drawn around (0,0) inside ±26
+const ICONS=[
+  // BOSS: a horned skull
+  'M-20-6q0-20 20-20t20 20v10l-6 4v8h-28v-8l-6-4z M-10-4a5 5 0 1 0 .1 0z M10-4a5 5 0 1 0 .1 0z M-26-22l8 8-4 4z M26-22l-8 8 4 4z',
+  // TRADE: two arrows passing
+  'M-24-8h30v-8l16 13-16 13v-8h-30z M24 10h-30v-8l-16 13 16 13v-8h30z',
+  // GIFT: a box with a bow
+  'M-22-6h44v10h-44z M-19 4h38v20h-38z M-3-6h6v30h-6z M0-6q-14-18-18-6t18 6z M0-6q14-18 18-6t-18 6z',
+  // UNLINK: two rings pulled apart
+  'M-28 0a10 10 0 1 0 20 0a10 10 0 1 0-20 0z M-23 0a5 5 0 1 0 10 0a5 5 0 1 0-10 0z M8 0a10 10 0 1 0 20 0a10 10 0 1 0-20 0z M13 0a5 5 0 1 0 10 0a5 5 0 1 0-10 0z M-3-12l6 0-2 8h-2z M-3 12l6 0-2-8h-2z'
+];
+const NAMES=['BOSS','TRADE','GIFT','UNLINK'];
+function icon(g,i,x,y,c,s=1){g.save();g.translate(x,y);g.scale(s,s);g.fillStyle=c;g.fill(new Path2D(ICONS[i]),'evenodd');g.restore()}
+const art=new Image();art.src='../assets/dragons/kiln-2.png';
+const art2=new Image();art2.src='../assets/dragons/ryu-2.png';
+function pet(g,im,x,h,flip){const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;const k=c.getContext('2d');k.drawImage(im,0,0);k.globalCompositeOperation='source-in';k.fillStyle=pal.ink;k.fillRect(0,0,c.width,c.height);const w=h*c.width/c.height;g.save();g.translate(x,0);if(flip)g.scale(-1,1);g.drawImage(c,-w/2,372-h,w,h);g.restore()}
+function screen(g,name,im,flip,sel){
+  g.fillStyle=pal.bg;g.fillRect(0,0,720,544);g.fillStyle=pal.bg2;g.fillRect(0,73,720,348);
+  g.fillStyle=pal.ink;g.fillRect(28,78,664,3);g.fillRect(28,420,664,3);
+  t(g,name,150,60,34,pal.ink,'left');t(g,'∞ LINK',592,58,24,pal.ink,'right');
+  pet(g,im,flip?250:470,180,flip);
+  for(let i=0;i<4;i++)icon(g,i,135+150*i,458,i===sel?pal.ink:pal.muted);
+  const x=135+150*sel;g.fillStyle=pal.ink;g.beginPath();g.moveTo(x,482);g.lineTo(x-8,495);g.lineTo(x+8,495);g.fill();
+  t(g,NAMES[sel],360,530,26);
+}
+let n=0;const go=()=>{if(++n<2)return;
+  screen(l.getContext('2d'),'KILN',art,false,0);
+  screen(r.getContext('2d'),'RYU',art2,true,1);
+  document.querySelectorAll('[data-i]').forEach(c=>{const g=c.getContext('2d');g.fillStyle=pal.bg;g.fillRect(0,0,200,120);icon(g,+c.dataset.i,100,60,pal.ink,1.7)});
+};
+art.onload=go;art2.onload=go;
+</script>
+</html>

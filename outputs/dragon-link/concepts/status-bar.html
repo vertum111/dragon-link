@@ -1,0 +1,69 @@
+<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Концепт: верхній бар і екран статусу</title>
+<style>
+:root{--paper:#e9eae4;--paper-2:#f4f4ef;--sumi:#1d1d1b;--sumi-2:#55554f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--sumi);font:15px/1.55 system-ui,sans-serif;padding:28px clamp(16px,4vw,48px) 60px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:20px;margin:34px 0 6px}
+.lead{color:var(--sumi-2);margin:0 0 18px;max-width:72ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+figure{margin:0;background:var(--paper-2);border:1.5px solid var(--sumi);border-radius:6px;padding:12px}
+figure canvas{display:block;width:100%;height:auto;border-radius:6px}
+figcaption{margin-top:10px}
+figcaption b{display:inline-block;background:var(--sumi);color:#fff;border-radius:3px;padding:0 7px;margin-right:6px}
+.pros{margin:6px 0 0;padding-left:18px;color:var(--sumi-2);font-size:14px}
+.rec{display:inline-block;margin-left:6px;padding:0 6px;border-radius:3px;background:#ff3f8e;color:#1d1d1b;font-size:12px;font-weight:700}
+</style>
+<h1>Верхній бар: як спростити</h1>
+<p class="lead">Зараз у барі сім дрібних елементів. Нижче три варіанти, намальовані на справжньому LCD у справжньому розмірі. У всіх трьох детальна статистика переїжджає на окремий екран <b>STATUS</b> (другий блок сторінки), як на оригінальних тамагочі.</p>
+<div class="grid">
+  <figure><canvas id="a" width="720" height="544"></canvas>
+    <figcaption><b>A</b> Лише ім’я великими літерами зліва і одна іконка потреби справа, яка з’являється, тільки коли щось закінчується. <span class="rec">Раджу</span>
+      <ul class="pros"><li>Найчистіше, дракон головний</li><li>Читається з будь-якої відстані</li></ul></figcaption></figure>
+  <figure><canvas id="b" width="720" height="544"></canvas>
+    <figcaption><b>B</b> Дві великі іконки з цифрами: миска 3/4 і серце 2/3. Ім’я та стадія — на екрані STATUS.
+      <ul class="pros"><li>Головне видно завжди</li><li>Цифри замість дрібних значків</li></ul></figcaption></figure>
+  <figure><canvas id="c" width="720" height="544"></canvas>
+    <figcaption><b>C</b> Бару немає зовсім: весь екран для дракона, а потреба показується «!» поруч з ним (як зараз).
+      <ul class="pros"><li>Максимально ретро</li><li>Без постійної інформації — треба відкривати STATUS</li></ul></figcaption></figure>
+</div>
+<h2>Екран STATUS</h2>
+<p class="lead">Нова перша іконка в меню (шкала), або пункт у CARE. Сторінки гортаються ◀ ▶, кожна — одна велика річ:</p>
+<div class="grid">
+  <figure><canvas id="s1" width="720" height="544"></canvas><figcaption><b>1</b> Хто це: ім’я, вид, стадія і скільки до наступної.</figcaption></figure>
+  <figure><canvas id="s2" width="720" height="544"></canvas><figcaption><b>2</b> Ситість і радість великими значками.</figcaption></figure>
+  <figure><canvas id="s3" width="720" height="544"></canvas><figcaption><b>3</b> Гаманець 鱗 і що лежить у сумці.</figcaption></figure>
+</div>
+<script>
+const pal={bg:'#c4c58e',bg2:'#b0b17c',mid:'#999b6c',ink:'#0b0d06',muted:'#6f7249'};
+const F='"DotGothic16","Courier New",monospace';
+const art=new Image(); art.src='../assets/dragons/kiln-1.png';
+const t=(g,s,x,y,size,c=pal.ink,a='center')=>{g.font=`bold ${size}px ${F}`;g.textAlign=a;g.fillStyle=c;g.fillText(s,x,y)};
+function heart(g,x,y,r,c){g.fillStyle=c;g.beginPath();g.moveTo(x,y+r*.9);g.bezierCurveTo(x-r*1.6,y-r*.2,x-r*.6,y-r*1.4,x,y-r*.4);g.bezierCurveTo(x+r*.6,y-r*1.4,x+r*1.6,y-r*.2,x,y+r*.9);g.fill()}
+function bowl(g,x,y,r,c){g.fillStyle=c;g.beginPath();g.arc(x,y,r,Math.PI,0);g.fill();g.fillRect(x-r*1.2,y,r*2.4,r*.35)}
+function scene(g,bar=true){
+  g.fillStyle=pal.bg;g.fillRect(0,0,720,544);g.fillStyle=pal.bg2;g.fillRect(0,73,720,348);
+  g.fillStyle=pal.mid;g.beginPath();g.moveTo(0,254);g.lineTo(113,155);g.lineTo(174,213);g.lineTo(289,133);g.lineTo(444,240);g.lineTo(553,163);g.lineTo(720,254);g.lineTo(720,410);g.lineTo(0,410);g.fill();
+  g.fillStyle=pal.ink;if(bar)g.fillRect(28,78,664,3);g.fillRect(28,420,664,3);
+  const icons=5;for(let i=0;i<icons;i++){g.fillStyle=i===0?pal.ink:pal.muted;g.fillRect(78+134*i,446,28,22)}
+  t(g,'STATUS',360,530,26);
+}
+function pet(g,x=360,h=170){const c=document.createElement('canvas');c.width=art.naturalWidth;c.height=art.naturalHeight;const k=c.getContext('2d');k.drawImage(art,0,0);k.globalCompositeOperation='source-in';k.fillStyle=pal.ink;k.fillRect(0,0,c.width,c.height);const w=h*c.width/c.height;g.drawImage(c,x-w/2,372-h,w,h)}
+function pageDots(g,n,i){for(let k=0;k<n;k++){g.fillStyle=k===i?pal.ink:pal.muted;g.fillRect(360-n*14+k*28,512,16,6)}}
+art.onload=()=>{
+  let g=a.getContext('2d');scene(g);pet(g);t(g,'KILN',150,58,34,pal.ink,'left');bowl(g,560,52,18,pal.ink);t(g,'!',604,62,38);
+  g=b.getContext('2d');scene(g);pet(g);bowl(g,170,52,16,pal.ink);t(g,'3/4',200,62,30,pal.ink,'left');heart(g,450,48,16,pal.ink);t(g,'2/3',478,62,30,pal.ink,'left');
+  g=c.getContext('2d');scene(g,false);pet(g,330,200);t(g,'!',520,250,110);
+  // status pages
+  g=s1.getContext('2d');g.fillStyle=pal.bg;g.fillRect(0,0,720,544);g.fillStyle=pal.ink;g.fillRect(28,420,664,3);
+  t(g,'KILN',360,120,48);t(g,'火 FIRE · BABY',360,180,30);g.fillStyle=pal.muted;g.fillRect(170,240,380,26);g.fillStyle=pal.ink;g.fillRect(170,240,190,26);t(g,'→ YOUNG  15 / 30 XP',360,320,26);
+  t(g,'◀',95,492,30);t(g,'▶',625,492,30);pageDots(g,3,0);
+  g=s2.getContext('2d');g.fillStyle=pal.bg;g.fillRect(0,0,720,544);g.fillStyle=pal.ink;g.fillRect(28,420,664,3);
+  t(g,'HUNGRY',200,130,34,pal.ink,'left');for(let i=0;i<4;i++)bowl(g,220+i*80,210,26,i<3?pal.ink:pal.muted);
+  t(g,'HAPPY',200,300,34,pal.ink,'left');for(let i=0;i<3;i++)heart(g,230+i*80,360,26,i<2?pal.ink:pal.muted);
+  t(g,'◀',95,492,30);t(g,'▶',625,492,30);pageDots(g,3,1);
+  g=s3.getContext('2d');g.fillStyle=pal.bg;g.fillRect(0,0,720,544);g.fillStyle=pal.ink;g.fillRect(28,420,664,3);
+  t(g,'鱗 20',360,140,64);t(g,'焼魚 x4   茶 x1',360,240,34);t(g,'火石 x2   川魚 x0',360,300,34);t(g,'珠 x0',360,360,34);
+  t(g,'◀',95,492,30);t(g,'▶',625,492,30);pageDots(g,3,2);
+};
+</script>
+</html>

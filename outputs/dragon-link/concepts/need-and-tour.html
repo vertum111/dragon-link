@@ -1,0 +1,122 @@
+<!doctype html><html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Концепти: потреби дракона й тур</title>
+<style>
+:root{--paper:#e9eae4;--paper-2:#f4f4ef;--sumi:#1d1d1b;--sumi-2:#55554f;--pink:#ff3f8e;--hair:#1d1d1b40}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--sumi);font:15px/1.55 "Hiragino Sans","Helvetica Neue",system-ui,sans-serif;padding:28px clamp(16px,4vw,48px) 60px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:20px;margin:36px 0 6px}
+.lead{color:var(--sumi-2);margin:0 0 18px;max-width:70ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+figure{margin:0;background:var(--paper-2);border:1.5px solid var(--sumi);border-radius:6px;padding:12px}
+figure canvas{display:block;width:100%;height:auto;border-radius:6px}
+figcaption{margin-top:10px}
+figcaption b{display:inline-block;background:var(--sumi);color:#fff;border-radius:3px;padding:0 7px;margin-right:6px}
+.pros{margin:6px 0 0;padding-left:18px;color:var(--sumi-2);font-size:14px}
+ol.steps{margin:0;padding-left:22px;max-width:70ch}
+ol.steps li{margin:4px 0}
+.mock{position:relative;aspect-ratio:16/10;max-width:980px;border:1.5px solid var(--sumi);border-radius:6px;overflow:hidden;background:var(--paper)}
+.mock .head{position:absolute;inset:0 0 auto 0;height:7%;border-bottom:1.5px solid var(--sumi);display:flex;align-items:center;padding:0 2%;font-weight:900;font-size:clamp(10px,1.6vw,16px)}
+.mock .head span{margin-left:auto;display:flex;gap:8px}.mock .head i{display:inline-block;width:clamp(16px,2.4vw,26px);height:clamp(16px,2.4vw,26px);border:1.5px solid var(--sumi);border-radius:50%}
+.mock .stage{position:absolute;left:0;top:7%;right:27%;bottom:0;display:grid;place-items:center}
+.mock .egg{width:34%;aspect-ratio:3/4;border-radius:48% 48% 44% 44%/58% 58% 40% 40%;background:#d64848;position:relative}
+.mock .egg:after{content:'';position:absolute;left:16%;right:16%;top:27%;height:34%;background:#c4c58e;border-radius:8px;border:4px solid #4f5638}
+.mock .side{position:absolute;right:0;top:7%;bottom:0;width:27%;border-left:1.5px solid var(--sumi);background:var(--paper-2);padding:2%;display:flex;flex-direction:column;gap:6%}
+.mock .side div{border:1px solid var(--hair);border-radius:4px;flex:1}
+.mock .side .lcd{flex:.7;background:#c6cf9f;border:3px solid #4f5638}
+.mock .dim{position:absolute;inset:0;background:#1d1d1b8c;
+  -webkit-mask:radial-gradient(ellipse 15% 22% at 37% 52%,transparent 96%,#000 100%);mask:radial-gradient(ellipse 15% 22% at 37% 52%,transparent 96%,#000 100%)}
+.mock .ring{position:absolute;left:22%;top:30%;width:30%;height:44%;border:3px solid var(--pink);border-radius:50%;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.04);opacity:.6}}
+.mock .card{position:absolute;left:55%;top:24%;width:34%;background:var(--paper-2);border:1.5px solid var(--sumi);border-radius:6px;padding:14px;font-size:clamp(11px,1.3vw,14px);box-shadow:0 8px 30px #0005}
+.mock .card:before{content:'';position:absolute;left:-12px;top:34px;border:6px solid transparent;border-right-color:var(--sumi);border-width:6px 12px}
+.mock .card .step{font-weight:700;color:var(--sumi-2);font-size:.85em}
+.mock .card h3{margin:2px 0 6px;font-size:1.25em}
+.mock .card p{margin:0 0 10px}
+.mock .card .try{display:flex;gap:6px;align-items:center;font-weight:700;margin-bottom:10px}
+.mock .card kbd{display:inline-grid;place-items:center;min-width:24px;height:24px;border:1.5px solid var(--sumi);border-radius:12px;background:#fff;font:700 12px system-ui}
+.mock .card .row{display:flex;gap:8px;align-items:center}
+.mock .card button{font:700 13px system-ui;border:1.5px solid var(--sumi);border-radius:4px;background:var(--paper-2);padding:6px 12px}
+.mock .card button.spot{background:var(--pink)}
+.mock .card .dots{margin-left:auto;display:flex;gap:4px}.mock .card .dots i{width:7px;height:7px;border-radius:50%;background:var(--hair)}.mock .card .dots i.on{background:var(--sumi)}
+.note{color:var(--sumi-2);font-size:14px;max-width:72ch}
+</style>
+
+<h1>Концепти на затвердження</h1>
+<p class="lead">Нічого з цього ще не в грі. Обери варіант для потреб дракона і скажи, чи підходить тур.</p>
+
+<h2>1. Чим замінити тучку з дощем</h2>
+<p class="lead">Зараз тучка з’являється, коли ситість або радість падає до нуля. Ось три способи показати, <b>чого саме</b> бракує. Кадри намальовані на справжньому LCD з новим драконом.</p>
+<div class="grid">
+  <figure><canvas id="needA" width="720" height="544"></canvas>
+    <figcaption><b>A</b> Бульбашка над головою з тим, що потрібно: миска (голодний) або розбите серце (сумно), під нею слово.
+      <ul class="pros"><li>Найзрозуміліше з першого погляду</li><li>Схоже на мову коміксів, як на упаковці</li></ul></figcaption></figure>
+  <figure><canvas id="needB" width="720" height="544"></canvas>
+    <figcaption><b>B</b> Як на справжньому тамагочі: великий «!» біля дракона, блимає іконка меню, яку треба натиснути (CARE), і порожня лінійка вгорі.
+      <ul class="pros"><li>Підказує, куди натиснути</li><li>Найбільш «ретро»</li></ul></figcaption></figure>
+  <figure><canvas id="needC" width="720" height="544"></canvas>
+    <figcaption><b>C</b> Думка-хмаринка з крапками, а в ній ієрогліф того, чого хоче: 焼魚 (риба) або ♥ (погратися).
+      <ul class="pros"><li>Мило, «мріє про рибку»</li><li>Найменше заважає дракону</li></ul></figcaption></figure>
+</div>
+
+<h2>2. Інтерактивний тур при першому вході</h2>
+<p class="lead">Запускається один раз після першого розпакування (потім — з налаштувань «Show the tour again»). Затемнює сторінку, підсвічує одну частину і просить <b>зробити дію</b>, а не просто читати. Можна пропустити будь-коли.</p>
+<ol class="steps">
+  <li><b>Твоє яйце.</b> Підсвічено консоль: «Натисни ● (S), щоб узяти яйце», далі «ще раз ●, щоб вилупити». Крок закривається сам, коли дракон вилупиться.</li>
+  <li><b>Три кнопки.</b> «◀ ▶ (A / D) гортають меню, ● (S) обирає». Треба один раз гортнути.</li>
+  <li><b>Статусний бар.</b> Зліва ім’я, стадія і ріст, справа FOOD і JOY.</li>
+  <li><b>Нагодуй.</b> «CARE → FEED». Закривається, коли дракон поїсть.</li>
+  <li><b>Що каже дракон.</b> Панель-LCD справа: тут підказки й новини ринку.</li>
+  <li><b>Ринок 商店街.</b> Сумка, ціни торговців і хто що пояснює. «Відкрий SHOP на консолі, коли знадобиться їжа».</li>
+  <li><b>LINK.</b> Друг онлайн за кодом або Robo на цьому екрані: обмін і спільний бій.</li>
+  <li><b>Акаунт і налаштування.</b> Чип акаунта, звук, тиждень для суддів. «Готово!»</li>
+</ol>
+<p class="note">Так виглядає крок 1 поверх гри: усе, крім консолі, приглушене, консоль обведена рожевим, поруч картка-вкладка в стилі інструкції з номером кроку, підказкою дії, «Back / Next» і «Skip tour».</p>
+<div class="mock">
+  <div class="head">ドラゴンリンク <span><i></i><i></i></span></div>
+  <div class="stage"><div class="egg"></div></div>
+  <div class="side"><div class="lcd"></div><div></div><div></div></div>
+  <div class="dim"></div><div class="ring"></div>
+  <div class="card"><div class="step">Крок 1 з 8</div><h3>Це твоє яйце</h3><p>Натисни середню кнопку, щоб узяти яйце. Потім ще раз, щоб вилупити дракона.</p>
+    <div class="try">Спробуй: <kbd>●</kbd> або <kbd>S</kbd></div>
+    <div class="row"><button>Skip tour</button><button class="spot">Next</button><span class="dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div></div>
+</div>
+
+<script>
+const pal={bg:'#c4c58e',bg2:'#b0b17c',mid:'#999b6c',ink:'#0b0d06',muted:'#6f7249'};
+const art=new Image(); art.src='../assets/dragons/kiln-2.png';
+function base(g){
+  g.fillStyle=pal.bg;g.fillRect(0,0,720,544);g.fillStyle=pal.bg2;g.fillRect(0,73,720,348);
+  g.fillStyle=pal.mid;g.beginPath();g.moveTo(0,254);g.lineTo(113,155);g.lineTo(174,213);g.lineTo(289,133);g.lineTo(444,240);g.lineTo(553,163);g.lineTo(720,254);g.lineTo(720,410);g.lineTo(0,410);g.fill();
+  g.fillStyle=pal.ink;g.fillRect(28,78,664,3);g.fillRect(28,420,664,3);
+  g.font='bold 22px "Courier New",monospace';g.textAlign='left';g.fillText('KILN',150,46);g.fillRect(212,29,70,21);g.fillStyle=pal.bg;g.font='bold 15px "Courier New",monospace';g.fillText('YOUNG',220,45);
+  g.fillStyle=pal.muted;g.fillRect(372,28,3,46);
+  g.fillStyle=pal.ink;g.font='bold 16px "Courier New",monospace';g.fillText('FOOD',392,46);g.fillText('JOY',392,70);
+  for(let i=0;i<4;i++){g.fillStyle=pal.muted;g.beginPath();g.arc(514+i*26,42,8,Math.PI,0);g.fill()}
+  for(let i=0;i<3;i++){g.fillStyle=i<1?pal.ink:pal.muted;heart(g,540+i*26,64,8)}
+  const icons=['CARE','PLAY','WALK','SHOP','LINK'];g.font='bold 26px "Courier New",monospace';g.textAlign='center';g.fillStyle=pal.ink;g.fillText('CARE',360,530);
+  for(let i=0;i<5;i++){g.fillStyle=i===0?pal.ink:pal.muted;g.fillRect(80+134*i,446,26,22)}
+}
+function heart(g,x,y,r){g.beginPath();g.moveTo(x,y+r*.9);g.bezierCurveTo(x-r*1.6,y-r*.2,x-r*.6,y-r*1.4,x,y-r*.4);g.bezierCurveTo(x+r*.6,y-r*1.4,x+r*1.6,y-r*.2,x,y+r*.9);g.fill()}
+function tinted(){const c=document.createElement('canvas');c.width=art.naturalWidth;c.height=art.naturalHeight;const g=c.getContext('2d');g.drawImage(art,0,0);g.globalCompositeOperation='source-in';g.fillStyle=pal.ink;g.fillRect(0,0,c.width,c.height);return c}
+function dragon(g,x){const c=tinted(),h=210,w=h*c.width/c.height;g.drawImage(c,x-w/2,370-h,w,h)}
+art.onload=()=>{
+  // A: speech bubble with the need
+  let g=needA.getContext('2d');base(g);dragon(g,330);
+  g.fillStyle=pal.ink;g.beginPath();g.roundRect(430,100,170,112,18);g.fill();g.beginPath();g.moveTo(452,206);g.lineTo(420,240);g.lineTo(482,206);g.fill();
+  g.fillStyle=pal.bg;g.beginPath();g.roundRect(436,106,158,100,14);g.fill();
+  g.fillStyle=pal.ink;g.beginPath();g.moveTo(470,138);g.lineTo(560,138);g.quadraticCurveTo(554,172,515,172);g.quadraticCurveTo(476,172,470,138);g.fill();
+  for(let i=0;i<3;i++)g.fillRect(492+i*16,120-i*3,6,10);
+  g.font='bold 22px "Courier New",monospace';g.textAlign='center';g.fillText('HUNGRY',515,198);
+  // B: classic attention mark + blinking CARE icon + empty bar
+  g=needB.getContext('2d');base(g);dragon(g,320);
+  g.fillStyle=pal.ink;g.font='bold 120px "Courier New",monospace';g.textAlign='center';g.fillText('!',500,250);
+  g.strokeStyle=pal.ink;g.lineWidth=5;g.strokeRect(64,436,58,42);g.font='bold 20px "Courier New",monospace';g.fillText('◀ PRESS',190,412);
+  g.fillStyle=pal.ink;g.fillRect(380,32,212,4);
+  // C: thought cloud with the wish
+  g=needC.getContext('2d');base(g);dragon(g,300);
+  g.fillStyle=pal.ink;for(const [x,y,r] of [[400,214,8],[422,190,12]])g.beginPath(),g.arc(x,y,r,0,7),g.fill();
+  g.beginPath();for(const [x,y,r] of [[470,140,34],[510,120,40],[556,136,34],[530,166,32],[480,168,30]])g.moveTo(x+r,y),g.arc(x,y,r,0,7);g.fill();
+  g.fillStyle=pal.bg;g.beginPath();for(const [x,y,r] of [[470,140,28],[510,120,34],[556,136,28],[530,166,26],[480,168,24]])g.moveTo(x+r,y),g.arc(x,y,r,0,7);g.fill();
+  g.fillStyle=pal.ink;g.font='bold 40px "Hiragino Sans",sans-serif';g.textAlign='center';g.fillText('焼魚',514,158);
+};
+</script>
+</html>

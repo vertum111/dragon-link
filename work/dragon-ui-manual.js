@@ -24,7 +24,9 @@
     for (const chip of $$('[data-account-chip]')) {
       const guest = !acct || acct.method === 'guest';
       chip.toggleAttribute('data-guest', guest);
-      $('.avatar', chip).textContent = guest ? '?' : acct.name[0].toUpperCase();
+      const av = $('.avatar', chip);
+      if (!guest && acct.picture) av.innerHTML = `<img src="${escape(acct.picture)}" alt="" referrerpolicy="no-referrer">`;
+      else av.textContent = guest ? '?' : acct.name[0].toUpperCase();
       const balance = `${window.DLD?.market?.count('scales') ?? 0} coins`;
       $('.name', chip).innerHTML = guest ? `Guest<small>${balance}</small>` : `${escape(acct.name)}<small>${balance}</small>`;
       chip.setAttribute('aria-label', guest ? 'Guest. Open settings' : `Signed in as ${acct.name}. Open settings`);
@@ -69,7 +71,47 @@
   }
   $('[data-continue]').addEventListener('click', () => openCover());
   $('[data-switch]').addEventListener('click', () => { $('[data-welcome]').hidden = true; $('[data-signin]').hidden = false });
-  for (const b of $$('[data-login]')) b.addEventListener('click', () => openCover(signIn(b.dataset.login)));
+  for (const b of $$('[data-login]')) b.addEventListener('click', () => b.dataset.login === 'google' ? googleSignIn(b) : openCover(signIn(b.dataset.login)));
+
+  /* ── Sign in with Google: a real Google account, checked on our server before it counts ── */
+  const GOOGLE_CLIENT_ID = document.querySelector('meta[name="google-client-id"]')?.content || '';
+  const signinNote = msg => {
+    let n = $('[data-signin-note]');
+    if (!n) { n = document.createElement('p'); n.className = 'fine'; n.dataset.signinNote = ''; n.setAttribute('role', 'status'); $('[data-signin]').append(n); }
+    n.textContent = msg;
+  };
+  const slug = s => String(s || '').normalize('NFKD').replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 16) || 'player';
+  async function verifyGoogle(accessToken) {
+    // On the hosted site a Netlify function verifies the token with Google (audience, expiry, verified email).
+    let r = null;
+    try { r = await fetch('/.netlify/functions/google-auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ access_token: accessToken }) }); } catch {}
+    if (r && r.ok) return r.json();
+    if (r && r.status !== 404) throw new Error((await r.json().catch(() => ({}))).error || `Sign-in check failed (${r.status}).`);
+    // Local preview without the function: ask Google directly for the profile.
+    const u = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { authorization: `Bearer ${accessToken}` } });
+    if (!u.ok) throw new Error('Google did not accept the sign-in.');
+    const p = await u.json();
+    return { name: p.given_name || p.name, email: p.email, picture: p.picture, handle: `${slug(p.given_name || p.email)}-${String(p.sub).slice(-4)}.dragonlink.testnet`, verified: false };
+  }
+  function googleSignIn(btn) {
+    if (!GOOGLE_CLIENT_ID) return signinNote('Google sign-in is not set up on this copy of the game. Play as a guest or use your email.');
+    if (!window.google?.accounts?.oauth2) return signinNote('Google sign-in is still loading. Try again in a moment.');
+    btn.disabled = true; signinNote('Opening Google…');
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID, scope: 'openid email profile',
+      callback: async resp => {
+        if (resp.error) { btn.disabled = false; return signinNote(resp.error === 'access_denied' ? 'Google sign-in was cancelled.' : `Google sign-in failed: ${resp.error}`); }
+        try {
+          signinNote('Checking your Google account…');
+          const p = await verifyGoogle(resp.access_token);
+          openCover({ method: 'google', name: p.name || 'Player', email: p.email, picture: p.picture, handle: p.handle, verified: !!p.verified });
+        } catch (e) { signinNote(e.message || 'Google sign-in failed.'); }
+        btn.disabled = false;
+      },
+      error_callback: e => { btn.disabled = false; signinNote(e && e.type === 'popup_closed' ? 'Google sign-in was closed.' : 'Google sign-in could not open. Allow pop-ups for this site and try again.'); },
+    });
+    client.requestAccessToken({ prompt: 'select_account' });
+  }
   $('[data-email-form]').addEventListener('submit', e => { e.preventDefault(); openCover(signIn('email', $('#email').value)) });
 
   /* ── settings insert ── */

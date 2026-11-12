@@ -1,6 +1,7 @@
 # The game is a static page; the NEAR relay server (server/) runs separately.
 [build]
   publish = "outputs/dragon-link"
+  functions = "netlify/functions"
 
 [[redirects]]
   from = "/"

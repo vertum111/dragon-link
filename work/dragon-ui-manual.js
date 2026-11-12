@@ -58,7 +58,7 @@
     renderAccount(store.get());
     // chain mode: make (or reuse) this device's game account on NEAR, behind the scenes
     const who = store.get();
-    window.DLD?.chainReady?.then(chain => { if (chain && !chain.accountId) window.DLD.market.login(who?.name || 'guest').then(() => renderAccount(store.get())); });
+    if (who?.method !== 'privy') window.DLD?.chainReady?.then(chain => { if (chain && !chain.accountId) window.DLD.market.login(who?.name || 'guest').then(() => renderAccount(store.get())); });
     login.classList.add('opening');
     setTimeout(() => { login.hidden = true }, reduced ? 220 : 980);
   }
@@ -73,46 +73,48 @@
   $('[data-switch]').addEventListener('click', () => { $('[data-welcome]').hidden = true; $('[data-signin]').hidden = false });
   for (const b of $$('[data-login]')) b.addEventListener('click', () => b.dataset.login === 'google' ? googleSignIn(b) : openCover(signIn(b.dataset.login)));
 
-  /* ── Sign in with Google: a real Google account, checked on our server before it counts ── */
-  const GOOGLE_CLIENT_ID = document.querySelector('meta[name="google-client-id"]')?.content || '';
+  /* ── Sign in with Google or email (Privy): no seed phrase, no wallet pop-up, no gas ──
+     Privy gives the player an embedded NEAR wallet; its key becomes their game account's key,
+     so the same Google or email signs in to the same dragon on any device. */
+  const PRIVY_APP_ID = document.querySelector('meta[name="privy-app-id"]')?.content || '';
+  let privy = null;
   const signinNote = msg => {
     let n = $('[data-signin-note]');
     if (!n) { n = document.createElement('p'); n.className = 'fine'; n.dataset.signinNote = ''; n.setAttribute('role', 'status'); $('[data-signin]').append(n); }
     n.textContent = msg;
   };
-  const slug = s => String(s || '').normalize('NFKD').replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 16) || 'player';
-  async function verifyGoogle(accessToken) {
-    // On the hosted site a Netlify function verifies the token with Google (audience, expiry, verified email).
-    let r = null;
-    try { r = await fetch('/.netlify/functions/google-auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ access_token: accessToken }) }); } catch {}
-    if (r && r.ok) return r.json();
-    if (r && r.status !== 404) throw new Error((await r.json().catch(() => ({}))).error || `Sign-in check failed (${r.status}).`);
-    // Local preview without the function: ask Google directly for the profile.
-    const u = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { authorization: `Bearer ${accessToken}` } });
-    if (!u.ok) throw new Error('Google did not accept the sign-in.');
-    const p = await u.json();
-    return { name: p.given_name || p.name, email: p.email, picture: p.picture, handle: `${slug(p.given_name || p.email)}-${String(p.sub).slice(-4)}.dragonlink.testnet`, verified: false };
-  }
-  function googleSignIn(btn) {
-    if (!GOOGLE_CLIENT_ID) return signinNote('Google sign-in is not set up on this copy of the game. Play as a guest or use your email.');
-    if (!window.google?.accounts?.oauth2) return signinNote('Google sign-in is still loading. Try again in a moment.');
-    btn.disabled = true; signinNote('Opening Google…');
-    const client = google.accounts.oauth2.initTokenClient({
-      client_id: GOOGLE_CLIENT_ID, scope: 'openid email profile',
-      callback: async resp => {
-        if (resp.error) { btn.disabled = false; return signinNote(resp.error === 'access_denied' ? 'Google sign-in was cancelled.' : `Google sign-in failed: ${resp.error}`); }
-        try {
-          signinNote('Checking your Google account…');
-          const p = await verifyGoogle(resp.access_token);
-          openCover({ method: 'google', name: p.name || 'Player', email: p.email, picture: p.picture, handle: p.handle, verified: !!p.verified });
-        } catch (e) { signinNote(e.message || 'Google sign-in failed.'); }
-        btn.disabled = false;
+  function loadPrivy() {
+    if (!privy) privy = import('./privy.bundle.js').then(m => m.startPrivy({
+      appId: PRIVY_APP_ID,
+      onIdentity: async identity => {
+        const prev = store.get(), acct = { method: 'privy', name: identity.name, email: identity.email, handle: prev?.method === 'privy' ? prev.handle : '' };
+        store.set(acct);
+        if (!login.hidden) openCover(acct); else renderAccount(acct);
+        const chain = await window.DLD?.chainReady;
+        if (chain) { const id = await window.DLD.market.login(identity.name, identity); if (id) { store.set({ ...acct, handle: id }); renderAccount(store.get()); } }
       },
-      error_callback: e => { btn.disabled = false; signinNote(e && e.type === 'popup_closed' ? 'Google sign-in was closed.' : 'Google sign-in could not open. Allow pop-ups for this site and try again.'); },
-    });
-    client.requestAccessToken({ prompt: 'select_account' });
+      onLogout: () => { store.set(null); window.DLD?.market?.signOut?.(); location.reload(); },
+      onError: e => signinNote(typeof e === 'string' && e === 'exited_auth_flow' ? 'Sign-in was closed.' : 'Sign-in did not finish. Try again, or play as a guest.'),
+    }));
+    return privy;
   }
-  $('[data-email-form]').addEventListener('submit', e => { e.preventDefault(); openCover(signIn('email', $('#email').value)) });
+  async function privySignIn(btn, opts) {
+    if (!PRIVY_APP_ID) return signinNote('Sign-in is not set up on this copy of the game. Play as a guest.');
+    btn && (btn.disabled = true); signinNote('Opening sign-in…');
+    try {
+      const api = await loadPrivy();
+      for (let i = 0; i < 50 && !api.ready; i++) await new Promise(r => setTimeout(r, 100));
+      api.login(opts); signinNote('');
+    } catch (e) { console.warn('Privy', e); signinNote('Sign-in is not available right now. Play as a guest.'); }
+    btn && (btn.disabled = false);
+  }
+  function googleSignIn(btn) { return privySignIn(btn, { loginMethods: ['google'] }); }
+  $('[data-email-form]').addEventListener('submit', e => {
+    e.preventDefault();
+    privySignIn(e.submitter, { loginMethods: ['email'], prefill: { type: 'email', value: $('#email').value } });
+  });
+  // a returning Privy player: restore the session (and their wallet signer) quietly
+  if (store.get()?.method === 'privy') loadPrivy().catch(() => {});
 
   /* ── settings insert ── */
   const settings = $('#settings');
@@ -131,7 +133,10 @@
     const k = r.dataset.mix; $(`[data-mix-out="${k}"]`).textContent = r.value;
     window.DLD?.setMix(k, r.value / 100 * SCALE[k]);
   });
-  $('[data-signout]').addEventListener('click', () => { store.set(null); location.reload() });
+  $('[data-signout]').addEventListener('click', async () => {
+    if (store.get()?.method === 'privy') { try { const api = await loadPrivy(); await api.logout(); return; } catch {} }
+    store.set(null); window.DLD?.market?.signOut?.(); location.reload();
+  });
   $('[data-reset]').addEventListener('click', () => {
     if (confirm('Erase your dragon? It starts again from the egg. This cannot be undone.')) window.DLD?.resetProgress();
   });

@@ -1,5 +1,5 @@
 set -eu
-deps="${DRAGON_DEPS:-$HOME/Documents/Codex/2026-11-03/new-chat/work/dragon-caps/node_modules}"  # folder with esbuild + three
+deps="${DRAGON_DEPS:-$PWD/node_modules}"  # esbuild + three, from the root package.json
 NODE_PATH="$deps:$PWD/server/node_modules" "$deps/esbuild/bin/esbuild" work/dragon-duo.js --bundle --minify --loader:.glb=binary --loader:.svg=dataurl --loader:.png=dataurl --alias:util=./work/chain/util-shim.js --define:global=globalThis --outfile=work/dragon-duo.bundle.js
 python3 - <<'PY'
 from pathlib import Path

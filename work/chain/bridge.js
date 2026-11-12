@@ -26,15 +26,23 @@ export async function connectChain() {
   };
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch {}
-  let account = saved ? new Account(saved.accountId, provider, saved.secretKey) : null;
+  // a guest's key lives in this browser; a signed-in player's key is their Privy wallet (identity), set on sign-in
+  let account = saved?.secretKey ? new Account(saved.accountId, provider, saved.secretKey) : null;
 
   return {
     cfg,
     get accountId() { return account?.accountId || null; },
     explorerTx: h => `${cfg.explorer}/txns/${h}`,
     explorerAccount: id => `${cfg.explorer}/address/${id}`,
-    /** First sign-in on this device: make a key here, ask the server to create the account for it. */
-    async login(name) {
+    /** Sign-in. With a Privy identity, its wallet key is the account's key (same Google/email → same account).
+     *  Without one, this browser makes a key and the server creates the account for it. */
+    async login(name, identity) {
+      if (identity) {
+        const { accountId } = await post('/api/account', { name, publicKey: identity.publicKey });
+        account = new Account(accountId, provider, identity.signer);
+        try { localStorage.setItem(KEY, JSON.stringify({ accountId, privy: true })); } catch {}
+        return accountId;
+      }
       if (account) return account.accountId;
       const kp = KeyPair.fromRandom('ed25519');
       const { accountId } = await post('/api/account', { name, publicKey: kp.getPublicKey().toString() });
@@ -157,15 +165,16 @@ export function bridgeMarket(market, chain) {
   market.acceptOffer = id => run('Trade accepted', () => chain.send('offer_accept', { id }));
   market.cancelOffer = id => run('Trade declined', () => chain.send('offer_cancel', { id }));
 
-  market.login = async displayName => {
+  market.login = async (displayName, identity) => {
     status('pending', 'Setting up your game account');
     try {
-      const id = await chain.login(displayName);
+      const id = await chain.login(displayName, identity);
       status('ok', 'Game account ready', { account: id, url: chain.explorerAccount(id) });
       await refreshBag();
       return id;
     } catch (e) { status('error', 'Could not create your game account', { error: e.message }); return null; }
   };
   if (online()) refreshBag();
+  market.signOut = () => { try { localStorage.removeItem(KEY); } catch {} };
   return chain;
 }

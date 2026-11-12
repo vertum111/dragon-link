@@ -4,6 +4,7 @@
 !/README.md
 !/netlify.toml
 !/netlify/
+!/.npmrc
 
 !/contracts/
 /contracts/items/target/
@@ -15,6 +16,8 @@
 !/work/
 /work/*
 !/work/dragon-duo.js
+!/work/privy.js
+!/work/build-privy.mjs
 !/work/dragon-duo.html
 !/work/dragon-duo-alt.html
 !/work/dragon-ui-manual.js
@@ -41,6 +44,7 @@
 /outputs/dragon-link/*
 !/outputs/dragon-link/dragon-link-manual.html
 !/outputs/dragon-link/dragon-link-3d.html
+!/outputs/dragon-link/privy.bundle.js
 !/outputs/dragon-link/assets/
 !/outputs/dragon-link/kiln-multiview/
 !/outputs/dragon-link/brand/
@@ -53,3 +57,5 @@
 .env*
 *key*.json
 *.bak
+!/package.json
+!/package-lock.json

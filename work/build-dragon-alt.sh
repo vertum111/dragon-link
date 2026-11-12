@@ -1,6 +1,7 @@
 set -eu
 # Manual-style alternative page; reuses the same game bundle.
 bash work/build-dragon-duo.sh >/dev/null
+node work/build-privy.mjs >/dev/null
 python3 - <<'PY'
 from pathlib import Path
 t=Path('work/dragon-duo-alt.html').read_text()

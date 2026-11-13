@@ -346,55 +346,12 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
   .modes{grid-template-columns:1fr}
   .row{grid-template-columns:90px 1fr auto}
 }
-#link-rotate{
-  position:fixed;inset:0;margin:0;width:100%;height:100%;max-width:none;max-height:none;
-  border:0;border-radius:0;text-align:center;padding:24px;overflow:auto
-}
-#link-rotate[open]{display:grid;place-items:center}
-.link-rotate-content{display:grid;justify-items:center;gap:16px;max-width:24rem}
-.link-rotate-phone{display:block;width:36px;height:60px;border:3px solid var(--sumi);
-  border-radius:7px;background:var(--pink);animation:link-phone-turn 2.4s ease-in-out infinite}
-@keyframes link-phone-turn{0%,20%{transform:rotate(0)}55%,85%{transform:rotate(90deg)}100%{transform:rotate(0)}}
-/* On narrow screens the linked session uses the same LCD at a readable size. */
-.mobile-link{display:none}
-@media (max-width:900px){
-  body.mobile-linked{--link-stage:clamp(140px,38dvh,340px)}
-  body.mobile-linked[data-link-lcd]{--link-stage:clamp(104px,25dvh,240px)}
-  body.mobile-linked #view,body.mobile-linked .plate{height:var(--link-stage);bottom:auto}
-  body.mobile-linked #front,body.mobile-linked .side{display:none}
-  body.mobile-linked .mobile-link{
-    position:fixed;inset:calc(var(--head) + var(--link-stage)) 0 0;z-index:3;
-    display:grid;align-content:start;gap:8px;overflow:auto;
-    padding:10px 16px max(10px,env(safe-area-inset-bottom));
-    border-top:1px solid var(--sumi);background:var(--paper-2)
-  }
-  .mobile-link>*{width:min(100%,480px);margin-inline:auto}
-  .mobile-link-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-  .mobile-link-head .btn{flex:none}
-  .mobile-link-status{margin-block:0;font:700 15px var(--gothic);overflow-wrap:anywhere}
-  .mobile-link-screen{display:block;height:auto;max-height:34dvh;object-fit:contain;aspect-ratio:720 / 544;
-    background:var(--lcd);border:4px solid var(--lcd-rim);border-radius:12px}
-  .mobile-link-keys,.mobile-link-actions{display:grid;gap:8px}
-  .mobile-link-keys{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .mobile-link-keys .btn{min-height:46px;background:#f5b56d;font-size:20px;touch-action:manipulation}
-  .mobile-link-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .mobile-link-unlink{justify-self:center;width:auto;color:#8a203b}
-  .mobile-link-hint{margin-block:0;font:700 14px var(--gothic)}
-  #trade .trade-cols{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  #trade .trade-list li{flex-wrap:wrap;gap:4px}
-}
-@media (max-width:900px) and (max-height:540px){
-  body.mobile-linked .mobile-link{align-content:start}
-}
-body.landscape-linked{--head:0px;--side:0px}
-body.landscape-linked .game-head,
-body.landscape-linked .side,
-body.landscape-linked #front{display:none}
-body.landscape-linked #view,body.landscape-linked .plate{
-  top:0;bottom:0;left:50%;right:auto;width:min(100%,142dvh);height:100%;
-  transform:translateX(-50%)
-}
-body.landscape-linked .plate{display:none}
+body.phone-linked{--head:0px;--side:0px}
+body.phone-linked .game-head,
+body.phone-linked .side,
+body.phone-linked #front,
+body.phone-linked .plate{display:none}
+body.phone-linked #view{inset:0;width:100%;height:100%}
 @media (prefers-reduced-motion:reduce){
   *,*:before,*:after{animation:none!important}
   #title,#login .cover{transition:opacity .2s!important}
@@ -417,24 +374,6 @@ body.landscape-linked .plate{display:none}
   <button class="icon-btn" type="button" data-open-settings aria-label="Settings"><svg aria-hidden="true"><use href="#i-gear"/></svg></button></div></header>
 <div class="plate" aria-hidden="true"><i></i><i></i><i></i><i></i><p class="caption"><span>Drag to turn the unit. The flat side is the LINK port.</span></p></div>
 <canvas id="view" inert tabindex="0" aria-label="Dragon Link 3D console. Use the buttons on the console or press A, S, and D."></canvas>
-<section class="mobile-link" aria-label="Linked console" hidden>
-  <div class="mobile-link-head">
-    <p class="mobile-link-status" data-mobile-link-status></p>
-    <button class="btn" type="button" data-mobile-lcd aria-controls="linked-lcd" aria-expanded="false">Enlarge LCD</button>
-  </div>
-  <canvas id="linked-lcd" class="mobile-link-screen" hidden width="720" height="544" aria-label="Your dragon’s LCD"></canvas>
-  <div class="mobile-link-keys">
-    <button class="btn" type="button" data-mobile-key="0" aria-label="Left">◀︎</button>
-    <button class="btn" type="button" data-mobile-key="1" aria-label="Select">●</button>
-    <button class="btn" type="button" data-mobile-key="2" aria-label="Right">▶︎</button>
-  </div>
-  <p class="mobile-link-hint" hidden>Match the arrows as they reach the ring. Your partner’s dragon plays its part automatically.</p>
-  <div class="mobile-link-actions">
-    <button class="btn" type="button" data-open-trade hidden>Trade</button>
-    <button class="btn spot" type="button" data-mobile-battle>Battle</button>
-  </div>
-  <button class="btn quiet mobile-link-unlink" type="button" data-mobile-unlink>Unlink</button>
-</section>
 <button id="front" class="btn" type="button"><svg><use href="#i-front"/></svg>Face front</button>
 <aside class="side" inert>
   <section class="sec"><h3><b>画面</b><span class="en">Your dragon says</span></h3>
@@ -612,14 +551,6 @@ body.landscape-linked .plate{display:none}
   </div>
 </dialog>
 
-<dialog id="link-rotate" aria-labelledby="link-rotate-title" aria-describedby="link-rotate-tip">
-  <form class="link-rotate-content" method="dialog">
-    <span class="link-rotate-phone" aria-hidden="true"></span>
-    <h2 id="link-rotate-title">Rotate your phone</h2>
-    <p id="link-rotate-tip">Play in landscape for a better view of both consoles.</p>
-    <button class="btn quiet" type="submit" autofocus>Continue in portrait</button>
-  </form>
-</dialog>
 <dialog id="unlink-confirm" aria-labelledby="unlink-title">
   <div class="dlg-head"><h2 id="unlink-title">Unlink from your friend?</h2></div>
   <form class="pane actions" method="dialog">

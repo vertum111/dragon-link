@@ -1154,43 +1154,10 @@ function startLink(friend){
   say(ember,'FINDING FRIEND…',1700);sfx('alert');
   updateHint('Looking for a nearby friend… Hold your console steady.');
 }
-const mobileLink=document.querySelector('.mobile-link');
-const mobileLCD=mobileLink?.querySelector('canvas');
-const mobileLinkScreen=mobileLCD?.getContext('2d');
-const mobileLCDToggle=mobileLink?.querySelector('[data-mobile-lcd]');
-let enlargedLCD=false;
-mobileLCDToggle?.addEventListener('click',()=>{enlargedLCD=!enlargedLCD;});
-const mobileViewport=matchMedia('(max-width:900px)');
-const landscapePhone=matchMedia('(orientation:landscape) and (pointer:coarse) and (max-height:600px)');
-const rotatePrompt=document.querySelector('#link-rotate');
-const portraitPhone=matchMedia('(max-width:900px) and (orientation:portrait) and (pointer:coarse)');
-let rotatePromptPending=false;
-portraitPhone.addEventListener('change',()=>{
-  if(!portraitPhone.matches){
-    rotatePromptPending=false;
-    if(rotatePrompt?.open)rotatePrompt.close();
-  }
-});
+const phoneLinkViewport=matchMedia('(pointer:coarse) and (max-width:900px), (pointer:coarse) and (orientation:landscape) and (max-height:600px)');
+const portraitViewport=matchMedia('(orientation:portrait)');
+const hasPhoneLinkLayout=Boolean(document.querySelector('.game-head'));
 let mobileLinkAt=0;
-function showMobileLink(show){
-  if(!mobileLink||mobileLink.hidden===!show)return;
-  mobileLink.hidden=!show;
-  document.body.classList.toggle('mobile-linked',show);
-  if(show)glacier.human=false;
-}
-mobileLink?.querySelectorAll('[data-mobile-key]').forEach(button=>{
-  button.addEventListener('click',()=>{if(docked)press(ember,Number(button.dataset.mobileKey));});
-});
-mobileLink?.querySelector('[data-mobile-battle]').addEventListener('click',()=>{
-  if(!docked||battle)return;
-  if(!ember.hatched){
-    mobileLink.querySelector('.mobile-link-hint').textContent='Hatch your dragon with the middle button to battle.';
-    mobileLink.querySelector('.mobile-link-hint').hidden=false;
-    return;
-  }
-  requestBattle();
-});
-mobileLink?.querySelector('[data-mobile-unlink]').addEventListener('click',()=>linkButton.click());
 function setDocked(value){
   if(value===docked)return;
   if(!value){glacier.human=false;if(battle)battle=null,setTrack('calm')}
@@ -1203,17 +1170,6 @@ function setDocked(value){
   }
   if(value){beamPower=.8;ringT=0;setTimeout(()=>emit(seamPos(),40,[0xff7a2a,0x2ad8ff,0xb7ff3a],2.4,.9,2),180)}
   mobileLinkAt=performance.now()+750;
-  rotatePromptPending=Boolean(value&&rotatePrompt&&portraitPhone.matches);
-  if(!value&&rotatePrompt?.open)rotatePrompt.close();
-  if(!value){
-    enlargedLCD=false;
-    showMobileLink(false);
-    document.body.removeAttribute('data-link-lcd');
-  }
-  if(value&&mobileLink){
-    mobileLink.querySelector('[data-mobile-link-status]').textContent='Linked with '+nm(glacier);
-    mobileLink.querySelector('.mobile-link-hint').hidden=true;
-  }
   linkButton.textContent=value?'Unlink':'Link with a friend';
   window.dispatchEvent(new CustomEvent('dragonlink:link',{detail:{linked:value,friend:nm(glacier),edition:glacier.edition}}));
   if(!value)selected=ember;
@@ -1589,39 +1545,19 @@ const frameFn=()=>{
 
   const t=nowMs/1000,now=clock();
   if(battle)tickBattle(now);
-  const landscapeLinked=Boolean(mobileLink&&landscapePhone.matches&&docked&&nowMs>=mobileLinkAt);
-  document.body.classList.toggle('landscape-linked',landscapeLinked);
-  const mobileFocused=Boolean(mobileLink&&mobileViewport.matches&&docked&&nowMs>=mobileLinkAt&&!landscapeLinked);
-  showMobileLink(mobileFocused);
-  if(rotatePromptPending&&mobileFocused&&!document.querySelector('dialog[open]')){
-    rotatePromptPending=false;
-    rotatePrompt.showModal();
-  }
-  const showLCD=mobileFocused&&(enlargedLCD||Boolean(battle));
-  if(mobileLink && mobileLCD.hidden===showLCD){
-    mobileLCD.hidden=!showLCD;
-    mobileLCDToggle.setAttribute('aria-expanded',String(showLCD));
-    mobileLCDToggle.textContent=showLCD?'Shrink LCD':'Enlarge LCD';
-    document.body.toggleAttribute('data-link-lcd',showLCD);
-  }
-  if(mobileFocused){
-    mobileLCDToggle.hidden=Boolean(battle);
-    mobileLink.querySelector('.mobile-link-actions').hidden=Boolean(battle);
-    mobileLink.querySelector('[data-mobile-unlink]').hidden=Boolean(battle);
-    const battleHint=mobileLink.querySelector('.mobile-link-hint');
-    if(battle){
-      const message=battle.state==='win'||battle.state==='lose'
-        ?'Press the middle button to return.'
-        :'Match the arrows as they reach the ring. Your partner plays automatically.';
-      if(battleHint.textContent!==message)battleHint.textContent=message;
-      battleHint.hidden=false;
-    }else if(ember.hatched)battleHint.hidden=true;
-  }
   if(searchingUntil&&now>searchingUntil&&friendReady!==false){searchingUntil=0;setDocked(true)}
-  const camZ=docked?Math.max(mobileFocused?8.1:10,13.6/camera.aspect):Math.max(8.9,(camera.aspect<.9?8.1:10.2)/camera.aspect);
-  const zt=landscapeLinked
-    ? {x:ember.group.position.x-.18,y:-.35,z:1+2.65/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))}
-    : zoomed&&!mobileFocused?zoomTarget():null;
+  const phoneLinked=docked&&phoneLinkViewport.matches&&nowMs>=mobileLinkAt&&hasPhoneLinkLayout;
+  document.body.classList.toggle('phone-linked',phoneLinked);
+  const portraitLinked=phoneLinked&&portraitViewport.matches;
+  const camZ=docked?Math.max(phoneLinked?7.8:10,13.6/camera.aspect):Math.max(8.9,(camera.aspect<.9?8.1:10.2)/camera.aspect);
+  let zt=zoomed&&!phoneLinked?zoomTarget():null;
+  if(portraitLinked){
+    // Frame the player's shell with enough room on the right to show the dock seam.
+    const halfTan=Math.tan(T.MathUtils.degToRad(camera.fov/2));
+    const halfWidth=(ember.dockHalf??dockSpacing)+.45;
+    const halfHeight=Math.max(2.04,halfWidth/camera.aspect);
+    zt={x:ember.group.position.x+.22,y:0,z:1+halfHeight/halfTan};
+  }
   camBase.x=T.MathUtils.lerp(camBase.x,zt?zt.x:0,.08);
   camBase.y=T.MathUtils.lerp(camBase.y,zt?zt.y:.1,.08);
   camera.position.z=T.MathUtils.lerp(camera.position.z,zt?zt.z:camZ,.08);
@@ -1654,9 +1590,8 @@ const frameFn=()=>{
     d.lampMat.emissive.setHex(lampOn?lampCol:0);
     d.lampMat.emissiveIntensity=lampOn?(.6+music.beatFlash*1.6+(d.attention?Math.max(0,Math.sin(t*8))*1.5:0)):0;
     d.lampGlow.material.color.setHex(lampCol);d.lampGlow.material.opacity=lampOn?.35+music.beatFlash*.5:0;
-    if(nowMs-d.lastDraw>((mobileFocused||landscapeLinked)&&battle?16:50)){
+    if(nowMs-d.lastDraw>(phoneLinked&&battle?16:50)){
       d.lastDraw=nowMs;drawLCD(d,t,now);
-      if(showLCD&&d===ember)mobileLinkScreen.drawImage(d.ctx.canvas,0,0);
     }
   }
   for(const d of devices){d.shadow.visible=d.group.visible;d.shadow.position.x=d.group.position.x;d.shadow.material.opacity=1-Math.min(.5,Math.abs(d.group.position.y)*2)}

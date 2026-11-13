@@ -1161,6 +1161,7 @@ const mobileLCDToggle=mobileLink?.querySelector('[data-mobile-lcd]');
 let enlargedLCD=false;
 mobileLCDToggle?.addEventListener('click',()=>{enlargedLCD=!enlargedLCD;});
 const mobileViewport=matchMedia('(max-width:900px)');
+const landscapePhone=matchMedia('(orientation:landscape) and (pointer:coarse) and (max-height:600px)');
 const rotatePrompt=document.querySelector('#link-rotate');
 const portraitPhone=matchMedia('(max-width:900px) and (orientation:portrait) and (pointer:coarse)');
 let rotatePromptPending=false;
@@ -1588,7 +1589,9 @@ const frameFn=()=>{
 
   const t=nowMs/1000,now=clock();
   if(battle)tickBattle(now);
-  const mobileFocused=Boolean(mobileLink&&mobileViewport.matches&&docked&&nowMs>=mobileLinkAt);
+  const landscapeLinked=Boolean(mobileLink&&landscapePhone.matches&&docked&&nowMs>=mobileLinkAt);
+  document.body.classList.toggle('landscape-linked',landscapeLinked);
+  const mobileFocused=Boolean(mobileLink&&mobileViewport.matches&&docked&&nowMs>=mobileLinkAt&&!landscapeLinked);
   showMobileLink(mobileFocused);
   if(rotatePromptPending&&mobileFocused&&!document.querySelector('dialog[open]')){
     rotatePromptPending=false;
@@ -1616,7 +1619,9 @@ const frameFn=()=>{
   }
   if(searchingUntil&&now>searchingUntil&&friendReady!==false){searchingUntil=0;setDocked(true)}
   const camZ=docked?Math.max(mobileFocused?8.1:10,13.6/camera.aspect):Math.max(8.9,(camera.aspect<.9?8.1:10.2)/camera.aspect);
-  const zt=zoomed&&!mobileFocused?zoomTarget():null;
+  const zt=landscapeLinked
+    ? {x:ember.group.position.x-.18,y:-.35,z:1+2.65/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))}
+    : zoomed&&!mobileFocused?zoomTarget():null;
   camBase.x=T.MathUtils.lerp(camBase.x,zt?zt.x:0,.08);
   camBase.y=T.MathUtils.lerp(camBase.y,zt?zt.y:.1,.08);
   camera.position.z=T.MathUtils.lerp(camera.position.z,zt?zt.z:camZ,.08);
@@ -1649,7 +1654,7 @@ const frameFn=()=>{
     d.lampMat.emissive.setHex(lampOn?lampCol:0);
     d.lampMat.emissiveIntensity=lampOn?(.6+music.beatFlash*1.6+(d.attention?Math.max(0,Math.sin(t*8))*1.5:0)):0;
     d.lampGlow.material.color.setHex(lampCol);d.lampGlow.material.opacity=lampOn?.35+music.beatFlash*.5:0;
-    if(nowMs-d.lastDraw>(mobileFocused&&battle?16:50)){
+    if(nowMs-d.lastDraw>((mobileFocused||landscapeLinked)&&battle?16:50)){
       d.lastDraw=nowMs;drawLCD(d,t,now);
       if(showLCD&&d===ember)mobileLinkScreen.drawImage(d.ctx.canvas,0,0);
     }

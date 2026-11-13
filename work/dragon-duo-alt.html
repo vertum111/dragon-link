@@ -386,6 +386,15 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
 @media (max-width:900px) and (max-height:540px){
   body.mobile-linked .mobile-link{align-content:start}
 }
+body.landscape-linked{--head:0px;--side:0px}
+body.landscape-linked .game-head,
+body.landscape-linked .side,
+body.landscape-linked #front{display:none}
+body.landscape-linked #view,body.landscape-linked .plate{
+  top:0;bottom:0;left:50%;right:auto;width:min(100%,142dvh);height:100%;
+  transform:translateX(-50%)
+}
+body.landscape-linked .plate{display:none}
 @media (prefers-reduced-motion:reduce){
   *,*:before,*:after{animation:none!important}
   #title,#login .cover{transition:opacity .2s!important}

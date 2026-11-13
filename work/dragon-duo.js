@@ -1158,6 +1158,14 @@ const phoneLinkViewport=matchMedia('(pointer:coarse) and (max-width:900px), (poi
 const portraitViewport=matchMedia('(orientation:portrait)');
 const hasPhoneLinkLayout=Boolean(document.querySelector('.game-head'));
 let mobileLinkAt=0;
+const rotatePrompt=document.querySelector('#link-rotate');
+let offerRotation=false;
+portraitViewport.addEventListener('change',()=>{
+  if(!portraitViewport.matches){
+    offerRotation=false;
+    if(rotatePrompt?.open)rotatePrompt.close();
+  }
+});
 function setDocked(value){
   if(value===docked)return;
   if(!value){glacier.human=false;if(battle)battle=null,setTrack('calm')}
@@ -1170,6 +1178,8 @@ function setDocked(value){
   }
   if(value){beamPower=.8;ringT=0;setTimeout(()=>emit(seamPos(),40,[0xff7a2a,0x2ad8ff,0xb7ff3a],2.4,.9,2),180)}
   mobileLinkAt=performance.now()+750;
+  offerRotation=Boolean(value&&rotatePrompt&&phoneLinkViewport.matches&&portraitViewport.matches);
+  if(!value&&rotatePrompt?.open)rotatePrompt.close();
   linkButton.textContent=value?'Unlink':'Link with a friend';
   window.dispatchEvent(new CustomEvent('dragonlink:link',{detail:{linked:value,friend:nm(glacier),edition:glacier.edition}}));
   if(!value)selected=ember;
@@ -1323,7 +1333,12 @@ canvas.addEventListener('pointermove',e=>{
   drag.x=e.clientX;drag.y=e.clientY;
 });
 for(const name of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(name,e=>{if(drag?.id===e.pointerId)drag=null});
-canvas.addEventListener('dblclick',face);
+canvas.addEventListener('selectstart',event=>event.preventDefault());
+canvas.addEventListener('contextmenu',event=>event.preventDefault());
+canvas.addEventListener('dblclick',event=>{
+  event.preventDefault();
+  face();
+});
 document.addEventListener('pointerdown',e=>{if(e.target!==canvas)zoomOut()},true);
 document.querySelector('#front').addEventListener('click',face);
 const unlinkDialog=document.querySelector('#unlink-confirm');
@@ -1549,6 +1564,10 @@ const frameFn=()=>{
   const phoneLinked=docked&&phoneLinkViewport.matches&&nowMs>=mobileLinkAt&&hasPhoneLinkLayout;
   document.body.classList.toggle('phone-linked',phoneLinked);
   const portraitLinked=phoneLinked&&portraitViewport.matches;
+  if(offerRotation&&portraitLinked&&!document.querySelector('dialog[open]')){
+    offerRotation=false;
+    rotatePrompt.showModal();
+  }
   const camZ=docked?Math.max(phoneLinked?7.8:10,13.6/camera.aspect):Math.max(8.9,(camera.aspect<.9?8.1:10.2)/camera.aspect);
   let zt=zoomed&&!phoneLinked?zoomTarget():null;
   if(portraitLinked){

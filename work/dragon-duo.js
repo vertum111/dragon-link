@@ -1155,7 +1155,11 @@ function startLink(friend){
   updateHint('Looking for a nearby friend… Hold your console steady.');
 }
 const mobileLink=document.querySelector('.mobile-link');
-const mobileLinkScreen=mobileLink?.querySelector('canvas').getContext('2d');
+const mobileLCD=mobileLink?.querySelector('canvas');
+const mobileLinkScreen=mobileLCD?.getContext('2d');
+const mobileLCDToggle=mobileLink?.querySelector('[data-mobile-lcd]');
+let enlargedLCD=false;
+mobileLCDToggle?.addEventListener('click',()=>{enlargedLCD=!enlargedLCD;});
 const mobileViewport=matchMedia('(max-width:900px)');
 let mobileLinkAt=0;
 function showMobileLink(show){
@@ -1189,7 +1193,11 @@ function setDocked(value){
   }
   if(value){beamPower=.8;ringT=0;setTimeout(()=>emit(seamPos(),40,[0xff7a2a,0x2ad8ff,0xb7ff3a],2.4,.9,2),180)}
   mobileLinkAt=performance.now()+750;
-  if(!value)showMobileLink(false);
+  if(!value){
+    enlargedLCD=false;
+    showMobileLink(false);
+    document.body.removeAttribute('data-link-lcd');
+  }
   if(value&&mobileLink){
     mobileLink.querySelector('[data-mobile-link-status]').textContent='Linked with '+nm(glacier);
     mobileLink.querySelector('.mobile-link-hint').hidden=true;
@@ -1571,7 +1579,15 @@ const frameFn=()=>{
   if(battle)tickBattle(now);
   const mobileFocused=Boolean(mobileLink&&mobileViewport.matches&&docked&&nowMs>=mobileLinkAt);
   showMobileLink(mobileFocused);
+  const showLCD=mobileFocused&&(enlargedLCD||Boolean(battle));
+  if(mobileLink && mobileLCD.hidden===showLCD){
+    mobileLCD.hidden=!showLCD;
+    mobileLCDToggle.setAttribute('aria-expanded',String(showLCD));
+    mobileLCDToggle.textContent=showLCD?'Shrink LCD':'Enlarge LCD';
+    document.body.toggleAttribute('data-link-lcd',showLCD);
+  }
   if(mobileFocused){
+    mobileLCDToggle.hidden=Boolean(battle);
     mobileLink.querySelector('.mobile-link-actions').hidden=Boolean(battle);
     mobileLink.querySelector('[data-mobile-unlink]').hidden=Boolean(battle);
     const battleHint=mobileLink.querySelector('.mobile-link-hint');
@@ -1584,8 +1600,8 @@ const frameFn=()=>{
     }else if(ember.hatched)battleHint.hidden=true;
   }
   if(searchingUntil&&now>searchingUntil&&friendReady!==false){searchingUntil=0;setDocked(true)}
-  const camZ=docked?Math.max(10,13.6/camera.aspect):Math.max(8.9,(camera.aspect<.9?8.1:10.2)/camera.aspect);
-  const zt=zoomed?zoomTarget():null;
+  const camZ=docked?Math.max(mobileFocused?8.1:10,13.6/camera.aspect):Math.max(8.9,(camera.aspect<.9?8.1:10.2)/camera.aspect);
+  const zt=zoomed&&!mobileFocused?zoomTarget():null;
   camBase.x=T.MathUtils.lerp(camBase.x,zt?zt.x:0,.08);
   camBase.y=T.MathUtils.lerp(camBase.y,zt?zt.y:.1,.08);
   camera.position.z=T.MathUtils.lerp(camera.position.z,zt?zt.z:camZ,.08);
@@ -1620,7 +1636,7 @@ const frameFn=()=>{
     d.lampGlow.material.color.setHex(lampCol);d.lampGlow.material.opacity=lampOn?.35+music.beatFlash*.5:0;
     if(nowMs-d.lastDraw>(mobileFocused&&battle?16:50)){
       d.lastDraw=nowMs;drawLCD(d,t,now);
-      if(mobileFocused&&d===ember)mobileLinkScreen.drawImage(d.ctx.canvas,0,0);
+      if(showLCD&&d===ember)mobileLinkScreen.drawImage(d.ctx.canvas,0,0);
     }
   }
   for(const d of devices){d.shadow.visible=d.group.visible;d.shadow.position.x=d.group.position.x;d.shadow.material.opacity=1-Math.min(.5,Math.abs(d.group.position.y)*2)}
@@ -1643,7 +1659,7 @@ const frameFn=()=>{
   rim.intensity=2+music.beatFlash*1.5;rim2.intensity=2+music.beatFlash*1.5;
   shake=Math.max(0,shake-dt);
   camera.position.x=camBase.x+(Math.random()-.5)*shake*.6;camera.position.y=camBase.y+(Math.random()-.5)*shake*.6;
-  if(!mobileFocused)renderer.render(scene,camera);
+  renderer.render(scene,camera);
 };
 renderer.setAnimationLoop(frameFn);
 // debug/automation hook (used for QA screenshots)

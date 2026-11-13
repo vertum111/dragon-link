@@ -349,20 +349,25 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
 /* On narrow screens the linked session uses the same LCD at a readable size. */
 .mobile-link{display:none}
 @media (max-width:900px){
-  body.mobile-linked #view,body.mobile-linked .plate,body.mobile-linked #front{visibility:hidden}
-  body.mobile-linked .side{display:none}
+  body.mobile-linked{--link-stage:clamp(140px,38dvh,340px)}
+  body.mobile-linked[data-link-lcd]{--link-stage:clamp(104px,25dvh,240px)}
+  body.mobile-linked #view,body.mobile-linked .plate{height:var(--link-stage);bottom:auto}
+  body.mobile-linked #front,body.mobile-linked .side{display:none}
   body.mobile-linked .mobile-link{
-    position:fixed;inset:var(--head) 0 0;z-index:3;display:grid;align-content:center;
-    gap:clamp(8px,2dvh,16px);overflow:auto;padding:12px 16px max(12px,env(safe-area-inset-bottom));
-    background:var(--paper-2)
+    position:fixed;inset:calc(var(--head) + var(--link-stage)) 0 0;z-index:3;
+    display:grid;align-content:start;gap:8px;overflow:auto;
+    padding:10px 16px max(10px,env(safe-area-inset-bottom));
+    border-top:1px solid var(--sumi);background:var(--paper-2)
   }
   .mobile-link>*{width:min(100%,480px);margin-inline:auto}
+  .mobile-link-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .mobile-link-head .btn{flex:none}
   .mobile-link-status{margin-block:0;font:700 15px var(--gothic);overflow-wrap:anywhere}
-  .mobile-link-screen{display:block;height:auto;max-height:42dvh;object-fit:contain;aspect-ratio:720 / 544;
+  .mobile-link-screen{display:block;height:auto;max-height:34dvh;object-fit:contain;aspect-ratio:720 / 544;
     background:var(--lcd);border:4px solid var(--lcd-rim);border-radius:12px}
   .mobile-link-keys,.mobile-link-actions{display:grid;gap:8px}
   .mobile-link-keys{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .mobile-link-keys .btn{min-height:52px;background:#f5b56d;font-size:20px;touch-action:manipulation}
+  .mobile-link-keys .btn{min-height:46px;background:#f5b56d;font-size:20px;touch-action:manipulation}
   .mobile-link-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
   .mobile-link-unlink{justify-self:center;width:auto;color:#8a203b}
   .mobile-link-hint{margin-block:0;font:700 14px var(--gothic)}
@@ -395,8 +400,11 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
 <div class="plate" aria-hidden="true"><i></i><i></i><i></i><i></i><p class="caption"><span>Drag to turn the unit. The flat side is the LINK port.</span></p></div>
 <canvas id="view" inert tabindex="0" aria-label="Dragon Link 3D console. Use the buttons on the console or press A, S, and D."></canvas>
 <section class="mobile-link" aria-label="Linked console" hidden>
-  <p class="mobile-link-status" data-mobile-link-status></p>
-  <canvas class="mobile-link-screen" width="720" height="544" aria-label="Your dragon’s LCD"></canvas>
+  <div class="mobile-link-head">
+    <p class="mobile-link-status" data-mobile-link-status></p>
+    <button class="btn" type="button" data-mobile-lcd aria-controls="linked-lcd" aria-expanded="false">Enlarge LCD</button>
+  </div>
+  <canvas id="linked-lcd" class="mobile-link-screen" hidden width="720" height="544" aria-label="Your dragon’s LCD"></canvas>
   <div class="mobile-link-keys">
     <button class="btn" type="button" data-mobile-key="0" aria-label="Left">◀︎</button>
     <button class="btn" type="button" data-mobile-key="1" aria-label="Select">●</button>

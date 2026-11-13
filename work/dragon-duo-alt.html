@@ -57,25 +57,18 @@ h1,h2,h3,h4{font-family:var(--gothic);margin:0}
   transition:transform .95s cubic-bezier(.62,0,.28,1),box-shadow .95s;box-shadow:0 0 0 #0000;backface-visibility:hidden;overflow:auto}
 #login.opening .cover{transform:rotateY(-104deg);box-shadow:-40px 0 60px #0000004d}
 #login.opening{pointer-events:none}
-.cover-text{display:flex;flex-direction:column;padding:34px clamp(24px,4vw,64px) 28px;min-width:0}
-.cover-meta{display:flex;justify-content:space-between;font:700 13px var(--gothic)}
-.cover-meta span{font-weight:400;color:var(--sumi-2)}
-.cover-title{margin:auto 0 0;padding-top:24px}
-.cover-title h1{font:900 clamp(40px,5.6vw,96px)/.98 var(--gothic);letter-spacing:-.01em;white-space:nowrap}
-.cover-title h1 .ch{display:inline-block;animation:drop .55s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(.35s + var(--i) * 55ms)}
-@keyframes drop{from{transform:translateY(-.5em);opacity:0}}
-.cover-title p{margin:10px 0 0;font:700 17px var(--gothic)}
-.cover-title p span{display:inline-block;margin-left:10px;padding:0 8px;background:var(--sumi);color:var(--paper-2);font-weight:700}
-.tagline{margin:18px 0 0;font-size:17px;max-width:30ch}
-.signin{margin:28px 0 auto;max-width:400px;display:flex;flex-direction:column;gap:10px}
-.signin h2{font:700 15px var(--gothic);margin-bottom:2px}
-.or{display:flex;align-items:center;gap:10px;font:400 13px var(--gothic);color:var(--sumi-2)}
-.or:before,.or:after{content:'';flex:1;height:1px;background:var(--hair)}
+.cover-text{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(28px,6vw,100px);min-width:0}
+.cover-title .cover-kana{margin:0 0 9px;font:700 14px var(--gothic);letter-spacing:.1em}
+.cover-title h1{font:900 clamp(44px,5.2vw,92px)/1 var(--gothic);letter-spacing:-.04em}
+.cover-title .tagline{margin:14px 0 0;font:400 17px/1.45 var(--gothic);color:var(--sumi-2)}
+.signin{width:min(100%,360px);margin-top:28px;display:grid;gap:10px}
+.signin h2{font:700 16px var(--gothic);overflow-wrap:anywhere}
+.signin-options{display:flex;justify-content:center;flex-wrap:wrap}
+.signin-options .btn{padding-inline:12px}
 .email-row{display:flex;gap:8px}
-.field{flex:1;min-width:0;min-height:44px;padding:8px 12px;border:1.5px solid var(--sumi);border-radius:4px;background:#fff;font:400 15px var(--gothic)}
-.field::placeholder{color:#8a8a84}
+.field{flex:1;min-width:0;min-height:44px;padding:8px 12px;border:1.5px solid var(--sumi);border-radius:4px;background:#fff;font:400 16px var(--gothic)}
+.field::placeholder{color:var(--sumi-2)}
 .fine{margin:4px 0 0;font-size:13px;color:var(--sumi-2)}
-.welcome-back{display:flex;flex-direction:column;gap:10px}
 .cover-art{position:relative;min-height:0;overflow:hidden;border-left:1.5px solid var(--sumi)}
 .cover-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:60% 30%;
   animation:print-in 1.1s cubic-bezier(.6,0,.2,1) both .1s, float 6s ease-in-out 1.4s infinite}
@@ -104,6 +97,18 @@ h1,h2,h3,h4{font-family:var(--gothic);margin:0}
 .pack-stage{position:absolute;inset:0}
 #pack-view{display:block;width:100%;height:100%;touch-action:none;cursor:grab;outline-offset:-4px}
 #pack-view:active{cursor:grabbing}
+.pack-drag-hint{position:absolute;inset:0;z-index:2;pointer-events:none;color:var(--sumi)}
+.pack-drag-hand{position:absolute;left:50%;top:55%;width:46px;height:46px;filter:drop-shadow(0 3px 2px #1d1d1b33);animation:pack-drag 3s ease-in-out both}
+.pack-drag-label{position:absolute;top:70%;left:50%;transform:translateX(-50%);white-space:nowrap;
+  border:1px solid var(--sumi);border-radius:4px;padding:5px 12px;background:var(--paper-2);font:700 14px var(--gothic)}
+@keyframes pack-drag{
+  0%,100%{opacity:0;transform:translate(-50%,4px)}
+  12%,88%{opacity:1}
+  25%,75%{transform:translate(calc(-50% - 27px),0) rotate(-10deg)}
+  50%{transform:translate(calc(-50% + 31px),0) rotate(10deg)}
+}
+@media(prefers-reduced-motion:reduce){.pack-drag-hand{display:none}}
+
 .pack-arrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:1.5px solid var(--sumi);border-radius:4px;background:var(--paper-2);font:700 18px var(--gothic);cursor:pointer;z-index:2}
 .pack-arrow:hover{background:#fff}
 #pack-prev{left:12px}#pack-next{right:12px}
@@ -179,7 +184,9 @@ h1,h2,h3,h4{font-family:var(--gothic);margin:0}
 .link-card p{margin:10px 0 0;font-size:13px;color:var(--sumi-2)}
 #link{width:100%}
 .link-card[data-linked] #link{background:var(--paper-2)}
-.trade-btn{margin-top:8px}
+.link-card[data-linked] #link{margin-top:12px;border-color:#a22b49;color:#8a203b;background:transparent}
+.link-card[data-linked] #link:hover{background:#a22b4912}
+#unlink-confirm .btn.spot{background:#962743;color:white}
 .trade-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .trade-cols h3{font:700 14px var(--gothic);margin-bottom:8px}
 .trade-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:240px;overflow:auto}
@@ -306,10 +313,12 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
   :root{--side:0px;--head:56px}
   .mark span,.folio{display:none}
   .account small,.account .name{display:none}.account{padding:4px}
-  #login .cover{grid-template-columns:1fr;grid-template-rows:42dvh auto}
+  #login .cover{grid-template-columns:1fr;grid-template-rows:clamp(160px,37dvh,350px) 1fr}
   .cover-art{order:-1;border-left:0;border-bottom:1.5px solid var(--sumi)}
-  .cover-text{padding:18px 18px 26px}.cover-title{margin:0;padding-top:4px}.cover-title h1{font-size:46px}.tagline{font-size:15px;margin-top:10px}.signin{margin:20px 0 0}
-  .cover-meta{display:none}
+  .cover-text{justify-content:flex-start;align-items:center;text-align:center;padding:24px 20px 32px}
+  .cover-title h1{font-size:clamp(42px,10vw,64px)}
+  .cover-title .tagline{font-size:16px;margin-top:10px}
+  .signin{margin-top:22px}
   #shelf{grid-template-columns:1fr}#shelf:before{display:none}
   .page{padding:14px 16px}
   .figure{flex:none;height:min(46dvh,400px);min-height:0}
@@ -338,7 +347,7 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-gear" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M10.3 3h3.4l.5 2.4 1.9.8 2-1.4 2.4 2.4-1.4 2 .8 1.9 2.4.5v3.4l-2.4.5-.8 1.9 1.4 2-2.4 2.4-2-1.4-1.9.8-.5 2.4h-3.4l-.5-2.4-1.9-.8-2 1.4-2.4-2.4 1.4-2-.8-1.9L3 13.7v-3.4l2.4-.5.8-1.9-1.4-2 2.4-2.4 2 1.4 1.9-.8Z"/><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"><polygon points="9.26,5.39 10.39,5.03 10.26,2.15 13.74,2.15 13.61,5.03 14.74,5.39 15.79,5.94 17.74,3.81 20.19,6.26 18.06,8.21 18.61,9.26 18.97,10.39 21.85,10.26 21.85,13.74 18.97,13.61 18.61,14.74 18.06,15.79 20.19,17.74 17.74,20.19 15.79,18.06 14.74,18.61 13.61,18.97 13.74,21.85 10.26,21.85 10.39,18.97 9.26,18.61 8.21,18.06 6.26,20.19 3.81,17.74 5.94,15.79 5.39,14.74 5.03,13.61 2.15,13.74 2.15,10.26 5.03,10.39 5.39,9.26 5.94,8.21 3.81,6.26 6.26,3.81 8.21,5.94"/><circle cx="12" cy="12" r="3.25"/></g></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></symbol>
   <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
   <symbol id="i-google" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M20 12.2h-7.6M19.6 12.2A7.8 7.8 0 1 1 17.3 6.6"/></symbol>
@@ -348,7 +357,7 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
 <!-- ─────────── game screen ─────────── -->
 <header class="runhead game-head paper"><span class="mark">ドラゴンリンク<span>取扱説明書</span></span><span class="folio">あそびかた<span>How to play, p.4</span></span>
   <div class="tools"><button class="account" type="button" data-account-chip><span class="avatar">G</span><span class="name">Guest<small>Not signed in</small></span></button>
-  <button class="icon-btn" type="button" data-open-settings aria-label="Settings"><svg><use href="#i-gear"/></svg></button></div></header>
+  <button class="icon-btn" type="button" data-open-settings aria-label="Settings"><svg aria-hidden="true"><use href="#i-gear"/></svg></button></div></header>
 <div class="plate" aria-hidden="true"><i></i><i></i><i></i><i></i><p class="caption"><span>Drag to turn the unit. The flat side is the LINK port.</span></p></div>
 <canvas id="view" inert tabindex="0" aria-label="Dragon Link 3D console. Use the buttons on the console or press A, S, and D."></canvas>
 <button id="front" class="btn" type="button"><svg><use href="#i-front"/></svg>Face front</button>
@@ -357,8 +366,8 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
     <p id="hint" class="lcd" aria-live="polite">Open a box to begin.</p></section>
   <section class="sec"><h3><b>通信</b><span class="en">Link</span></h3>
     <div class="link-card" data-link-card><p class="link-status" data-link-status>Not linked</p>
-      <button id="link" class="btn spot big" type="button">Link with a friend</button>
       <button class="btn big trade-btn" type="button" data-open-trade hidden>Trade</button>
+      <button id="link" class="btn spot big" type="button">Link with a friend</button>
       <p>Linked units share one screen. Battle the Shadow Wyrm together.</p></div></section>
   <section class="sec market"><h3><b>市場</b><span class="en">Market street</span><span class="mkt-day" data-mkt-day></span></h3>
     <ul class="bag" data-bag aria-label="Your bag"></ul>
@@ -378,13 +387,21 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
 <div id="title" class="paper"><div class="spread">
   <header class="runhead"><h1 class="mark">ドラゴンリンク<span>取扱説明書</span></h1><span class="folio">はじめに<span>Getting started, p.2–3</span></span>
     <div class="tools"><button class="account" type="button" data-account-chip><span class="avatar">G</span><span class="name">Guest<small>Not signed in</small></span></button>
-    <button class="icon-btn" type="button" data-open-settings aria-label="Settings"><svg><use href="#i-gear"/></svg></button></div></header>
+    <button class="icon-btn" type="button" data-open-settings aria-label="Settings"><svg aria-hidden="true"><use href="#i-gear"/></svg></button></div></header>
   <section id="shelf" aria-labelledby="shelf-title">
     <div class="page">
       <div class="fig-title"><h2>図1　四つの本体</h2><span class="en">The four units</span></div>
       <div class="figure">
         <div class="pack-stage">
-          <canvas id="pack-view" tabindex="0" aria-label="3D display. Use the arrow keys to browse and Space to flip a package."></canvas>
+          <canvas id="pack-view" tabindex="0" aria-label="3D display. Drag the selected package to rotate it. Use the arrow keys to browse and Space to flip a package."></canvas>
+          <div class="pack-drag-hint" role="status" hidden>
+            <svg class="pack-drag-hand" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="16" cy="10" r="8" fill="var(--pink)"/>
+              <path d="M16 10a3 3 0 0 1 6 0v13a3 3 0 0 1 6 0v1a3 3 0 0 1 6 0v2a3 3 0 0 1 6 0v6c0 4-2 7-5 11H22c-3-4-7-8-11-14a3 3 0 0 1 4-4l1 1Z"
+                fill="var(--paper-2)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+            <span class="pack-drag-label">Drag to rotate in 3D</span>
+          </div>
           <div id="pack-loader" class="pack-loader" role="status" hidden>
             <svg viewBox="0 0 256 256" aria-hidden="true"><path d="M24 114C27 73 78 27 128 17c50 10 101 56 104 97h-31l-19 18-27-22-27 24-27-24-27 22-19-18Z"/><path fill-rule="evenodd" d="M24 136h23l27 23 27-23 27 24 27-24 27 23 27-23h23c-2 61-43 103-104 103S26 197 24 136ZM79 177h29l-13 18Zm69 0h29l-16 18Z"/></svg>
             <span>Opening the package…</span>
@@ -428,19 +445,22 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
 <div id="login">
   <div class="cover paper">
     <div class="cover-text">
-      <div class="cover-meta">Ember Club<span>No. DL-98, Tokyo</span></div>
       <div class="cover-title">
-        <h1 aria-label="ドラゴンリンク" data-split>ドラゴンリンク</h1>
-        <p>Dragon Link<span>取扱説明書</span></p>
-        <p class="tagline">Raise a pocket dragon. Link up with a friend and battle side by side.</p>
+        <p class="cover-kana" lang="ja">ドラゴンリンク</p>
+        <h1>Dragon Link</h1>
+        <p class="tagline">Raise a pocket dragon.</p>
       </div>
       <div class="signin" data-signin>
-        <h2>Sign in to keep your dragon</h2>
-        <button class="btn spot big" type="button" data-login="google"><svg><use href="#i-google"/></svg>Continue with Google</button>
-        <form class="email-row" data-email-form><label class="sr" for="email">Email</label><input class="field" id="email" type="email" placeholder="you@example.com" autocomplete="email" required><button class="btn" type="submit"><svg><use href="#i-mail"/></svg>Continue</button></form>
-        <div class="or">or</div>
-        <button class="btn" type="button" data-login="guest">Play as a guest</button>
-        <p class="fine">No wallet or seed phrase. Your dragon is saved to your account automatically.</p>
+        <button class="btn spot big" type="button" data-login="google"><svg aria-hidden="true"><use href="#i-google"/></svg>Continue with Google</button>
+        <div class="signin-options">
+          <button class="btn quiet" type="button" data-toggle-email aria-controls="login-email-form" aria-expanded="false">Use email</button>
+          <button class="btn quiet" type="button" data-login="guest">Play as a guest</button>
+        </div>
+        <form class="email-row" id="login-email-form" data-email-form hidden>
+          <label class="sr" for="email">Email address</label>
+          <input class="field" id="email" type="email" placeholder="Email address" autocomplete="email" required>
+          <button class="btn" type="submit">Continue</button>
+        </form>
       </div>
       <div class="signin welcome-back" data-welcome hidden>
         <h2 data-welcome-name>Welcome back</h2>
@@ -517,6 +537,13 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
   </div>
 </dialog>
 
+<dialog id="unlink-confirm" aria-labelledby="unlink-title">
+  <div class="dlg-head"><h2 id="unlink-title">Unlink from your friend?</h2></div>
+  <form class="pane actions" method="dialog">
+    <button class="btn" type="submit" value="cancel" autofocus>Stay linked</button>
+    <button class="btn spot" type="submit" value="unlink">Unlink</button>
+  </form>
+</dialog>
 <dialog id="trade" aria-labelledby="trade-title">
   <div class="dlg-head"><h2 id="trade-title">交換</h2><span class="en" data-trade-with>Trade with your friend</span><form method="dialog"><button class="icon-btn" aria-label="Close"><svg><use href="#i-close"/></svg></button></form></div>
   <div class="dlg-body">

@@ -551,6 +551,17 @@ function mouthOf(d,x,y,s,flip){
   return [a.x+(a.flip?1:-1)*a.w*.4,a.bottom-a.h*.74];
 }
 function txt(p,s,x,y,size,color,align='center'){p.font=`bold ${size}px "DotGothic16","Courier New",monospace`;p.textAlign=align;p.fillStyle=color;p.fillText(s,x,y)}
+
+// Draw LCD segments directly so the OS cannot substitute colorful emoji.
+function lcdArrow(p,x,y,direction,color){
+  const cell=4;
+  p.fillStyle=color;
+  for(let column=0;column<4;column++){
+    const rows=column*2+1;
+    const dx=direction*(6-column*cell);
+    p.fillRect(x+dx-cell/2,y-rows*cell/2,cell,rows*cell);
+  }
+}
 function heart(p,x,y,r,c){p.fillStyle=c;p.beginPath();p.moveTo(x,y+r*.9);p.bezierCurveTo(x-r*1.6,y-r*.2,x-r*.6,y-r*1.4,x,y-r*.4);p.bezierCurveTo(x+r*.6,y-r*1.4,x+r*1.6,y-r*.2,x,y+r*.9);p.fill()}
 function palette(d){
   if(battle||d.game){
@@ -626,7 +637,7 @@ function drawStatus(p,d,pal,t,now){
     ['grilled','pearl','ore'].forEach((k,i)=>{const x=200+160*i,n=bag[k]||0,c=n?ink:pal.muted;drawItem(p,k,x,262,70,c);txt(p,'x'+n,x,356,30,c)});
   }
   const n=statusPages(d);
-  txt(p,'◀',95,492,30,ink);txt(p,'▶',625,492,30,ink);txt(p,STATUS_PAGES[pg],360,492,30,ink);
+  lcdArrow(p,95,482,-1,ink);lcdArrow(p,625,482,1,ink);txt(p,STATUS_PAGES[pg],360,492,30,ink);
   for(let i=0;i<n;i++){p.fillStyle=i===pg?ink:pal.muted;p.fillRect(360-n*14+i*28,512,16,6)}
   toast(p,d,pal,now);
 }
@@ -648,7 +659,7 @@ function drawEggPick(p,d,pal,t,now){
     if(on){const b=Math.floor(t*4)%2*4;poly(p,[[x-12,150+b],[x+12,150+b],[x,166+b]],pal.ink)}
   });
   const k=SPECIES[sel];
-  txt(p,'◀',95,492,30,pal.ink);txt(p,'▶',625,492,30,pal.ink);
+  lcdArrow(p,95,482,-1,pal.ink);lcdArrow(p,625,482,1,pal.ink);
   txt(p,`${SPECIES_INFO[k].name} EGG`,360,480,26,pal.ink);
   txt(p,'● CHOOSE',360,516,20,pal.ink);
   toast(p,d,pal,now);
@@ -661,7 +672,7 @@ function bottomMenu(p,d,pal,t){
   if(d.page!==null){
     const opts=submenuOf(d);
     txt(p,opts[d.sub],360,492,30,pal.ink);
-    txt(p,'◀',95,492,30,pal.ink);txt(p,'▶',625,492,30,pal.ink);
+    lcdArrow(p,95,482,-1,pal.ink);lcdArrow(p,625,482,1,pal.ink);
     for(let i=0;i<opts.length;i++){p.fillStyle=i===d.sub?pal.ink:pal.muted;p.fillRect(360-opts.length*14+i*28,512,16,6)}
     return;
   }
@@ -832,7 +843,7 @@ function drawGame(p,d,pal,t,now){
     if(d.name==='Ember')poly(p,[[s.x-30,330],[s.x+10,318],[s.x+26,330],[s.x+10,342]],pal.ink);
     else txt(p,'✻',s.x,342,38,pal.ink);
   }
-  txt(p,'◀ EXIT',120,492,24,pal.muted);txt(p,'● JUMP',360,492,26,pal.ink);txt(p,'▶ BREATH',600,492,24,pal.ink);
+  lcdArrow(p,82,482,-1,pal.muted);txt(p,'EXIT',129,492,24,pal.muted);txt(p,'● JUMP',360,492,26,pal.ink);lcdArrow(p,541,482,1,pal.ink);txt(p,'BREATH',605,492,24,pal.ink);
   toast(p,d,pal,now);
 }
 
@@ -973,7 +984,8 @@ function drawBattle(p,d,pal,t,now){
     const x=hitX-dir*dt*speed;if(n.judged==='miss'&&dt<-.05)continue;
     p.fillStyle=P.ink;p.beginPath();p.arc(x,482,26,0,7);p.fill();
     if(n.duo){p.strokeStyle=P.ink;p.lineWidth=4;p.beginPath();p.arc(x,482,36+Math.sin(t*20)*3,0,7);p.stroke();txt(p,'★',x,494,32,P.bg)}
-    else txt(p,keyLabels[n.key],x,494,30,P.bg);
+    else if(n.key===1)txt(p,keyLabels[1],x,494,30,P.bg);
+    else lcdArrow(p,x,484,n.key===0?-1:1,P.bg);
   }
   const j=b.judge[dev];
   if(j&&now<j.until){const k=(j.until-now);txt(p,j.text,hitX+(d.side===1?-170:170),420-k*30,j.text==='DUO!!'?54:34,P.ink)}
@@ -1063,7 +1075,7 @@ function drawShop(p,d,pal,t,now){
     STALLS.forEach((id,i)=>drawStall(p,ms[id],220+280*i,sh.stall===i,pal,t));
     const m=ms[STALLS[sh.stall]];
     const label=sh.stall===STALLS.length?'EXIT':(m.name.toUpperCase()+(m.open?'':' · CLOSED'));
-    txt(p,'◀',95,492,30,pal.ink);txt(p,'▶',625,492,30,pal.ink);txt(p,label,360,492,30,pal.ink);
+    lcdArrow(p,95,482,-1,pal.ink);lcdArrow(p,625,482,1,pal.ink);txt(p,label,360,492,30,pal.ink);
     for(let i=0;i<=STALLS.length;i++){p.fillStyle=i===sh.stall?pal.ink:pal.muted;p.fillRect(318+i*28,512,16,6)}
   } else {
     const m=ms[STALLS[sh.stall]],rows=shopRows(d);
@@ -1079,7 +1091,7 @@ function drawShop(p,d,pal,t,now){
       else{const pr=buyPrice(m,r.item);txt(p,'SELL',140,y,30,c,'left');txt(p,'you '+(bag[r.item]||0),470,y,24,c,'right');if(pr)priceTag(p,pr,650,y,30,c);else txt(p,'--',644,y,30,c,'right')}
     });
     const r=rows[sh.row];
-    txt(p,'◀',95,492,30,pal.ink);txt(p,'▶',625,492,30,pal.ink);
+    lcdArrow(p,95,482,-1,pal.ink);lcdArrow(p,625,482,1,pal.ink);
     txt(p,r.act==='back'?'● BACK':r.act==='buy'?'● BUY':'● SELL',360,492,30,pal.ink);
   }
   toast(p,d,pal,now);
@@ -1309,7 +1321,18 @@ for(const name of ['pointerup','pointercancel','lostpointercapture'])canvas.addE
 canvas.addEventListener('dblclick',face);
 document.addEventListener('pointerdown',e=>{if(e.target!==canvas)zoomOut()},true);
 document.querySelector('#front').addEventListener('click',face);
-linkButton.addEventListener('click',()=>{if(!started)start();if(docked)return setDocked(false);
+const unlinkDialog=document.querySelector('#unlink-confirm');
+unlinkDialog?.addEventListener('close',()=>{
+  if(unlinkDialog.returnValue==='unlink'&&docked)setDocked(false);
+});
+linkButton.addEventListener('click',()=>{
+  if(!started)start();
+  if(docked){
+    if(!unlinkDialog)return setDocked(false);
+    unlinkDialog.returnValue='';
+    unlinkDialog.showModal();
+    return;
+  }
   if(window.DragonLinkUI?.openLinkMenu)return window.DragonLinkUI.openLinkMenu();startLink()});
 muteButton?.addEventListener('click',toggleMute);
 function toggleMute(){muted=!muted;if(master)master.gain.value=muted?0:.8;if(muteButton)muteButton.textContent=muted?'♪ OFF':'♪ ON';

@@ -196,12 +196,56 @@ export function createPackGallery(canvas, environment, loadModel, onSelect) {
   });
   const ray=new T.Raycaster(), pointer=new T.Vector2();
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dragHint=canvas.parentElement.querySelector('.pack-drag-hint');
+  const loader=canvas.parentElement.querySelector('#pack-loader');
+  const loginCover=document.querySelector('#login');
+  const hintKey='dragon-link.pack-drag-hint-seen';
+  let hintPending=Boolean(dragHint), hintReadyAt=null, hintStartedAt=null;
+  try { if(localStorage.getItem(hintKey))hintPending=false; } catch {}
+  function rememberHint(){
+    hintPending=false;
+    try { localStorage.setItem(hintKey,'1'); } catch {}
+  }
+  function dismissHint(){
+    if(hintPending)rememberHint();
+    if(hintStartedAt===null)return;
+    hintStartedAt=null;
+    dragHint.hidden=true;
+  }
+  function hintAngle(now){
+    if(hintPending&&(!loginCover||loginCover.hidden)&&(!loader||loader.hidden)){
+      hintReadyAt??=now+300;
+      if(now>=hintReadyAt){
+        rememberHint();
+        hintStartedAt=now;
+        dragHint.hidden=false;
+      }
+    }
+    if(hintStartedAt===null)return 0;
+    const phase=(now-hintStartedAt)/3000;
+    if(phase>=1){dismissHint();return 0;}
+    if(reduced)return 0;
+    const poses=[0,-.24,.34,-.24,0];
+    const step=Math.floor(phase*4);
+    const blend=T.MathUtils.smoothstep(phase*4-step,0,1);
+    return T.MathUtils.lerp(poses[step],poses[step+1],blend);
+  }
+  if(hintPending){
+    const shelf=canvas.closest('#shelf');
+    shelf.addEventListener('pointerdown',event=>{
+      if(event.target===canvas||event.target.closest('button'))dismissHint();
+    },true);
+    shelf.addEventListener('keydown',event=>{
+      if(['ArrowLeft','ArrowRight',' ','Enter'].includes(event.key))dismissHint();
+    });
+  }
   let active=0,yaw=-.23,pitch=.075,zoom=1,back=false,drag=null;
   let reveal=null;
   let lastWidth=0,lastHeight=0;
   const targetScale=new T.Vector3();
   const ready=id=>items[ids.indexOf(id)]?.userData.ready;
   async function unbox(id){
+    dismissHint();
     const parts=await ready(id);
     if(!parts||reduced)return;
     select(id);
@@ -268,6 +312,7 @@ export function createPackGallery(canvas, environment, loadModel, onSelect) {
     camera.position.z=Math.max(9.35,7.05/camera.aspect);
     const spread=Math.min(3.18,2.45*camera.aspect);
     const ease=reduced?1:.15;
+    const previewYaw=hintAngle(performance.now());
     for(const [index,pack] of items.entries()){
       let relative=(index-active+ids.length)%ids.length;
       if(relative>ids.length/2)relative-=ids.length;
@@ -280,7 +325,7 @@ export function createPackGallery(canvas, environment, loadModel, onSelect) {
       pack.rotation.x=T.MathUtils.lerp(pack.rotation.x,front?pitch:0,ease);
       // Keep rotations continuous during drag and wrap only when switching items.
       if(!front)pack.rotation.y=T.MathUtils.euclideanModulo(pack.rotation.y+Math.PI,Math.PI*2)-Math.PI;
-      pack.rotation.y=T.MathUtils.lerp(pack.rotation.y,front?yaw:-Math.sign(relative)*.28,ease);
+      pack.rotation.y=T.MathUtils.lerp(pack.rotation.y,front?yaw+previewYaw:-Math.sign(relative)*.28,ease);
     }
     if(reveal){
       const now=performance.now();

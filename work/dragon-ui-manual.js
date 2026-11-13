@@ -43,8 +43,14 @@
 
   /* ── cover / sign-in ── */
   const login = $('#login');
-  const title = $('[data-split]');
-  title.innerHTML = [...title.textContent].map((c, i) => `<span class="ch" style="--i:${i}" aria-hidden="true">${c}</span>`).join('');
+  const emailToggle = $('[data-toggle-email]');
+  const emailForm = $('[data-email-form]');
+  emailToggle.addEventListener('click', () => {
+    const expanded = emailForm.hidden;
+    emailForm.hidden = !expanded;
+    emailToggle.setAttribute('aria-expanded', String(expanded));
+    if (expanded) $('#email').focus();
+  });
 
   function signIn(method, email) {
     // Placeholder profile. Swap for a real social/email login that also creates the player's NEAR account.
@@ -111,7 +117,7 @@
     btn && (btn.disabled = false);
   }
   function googleSignIn(btn) { return privySignIn(btn, { loginMethods: ['google'] }); }
-  $('[data-email-form]').addEventListener('submit', e => {
+  emailForm.addEventListener('submit', e => {
     e.preventDefault();
     privySignIn(e.submitter, { loginMethods: ['email'], prefill: { type: 'email', value: $('#email').value } });
   });

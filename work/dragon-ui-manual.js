@@ -313,8 +313,7 @@
     }).join('');
     const fresh = incoming.filter(o => !shownOffers.has(o.id));
     for (const o of fresh) shownOffers.add(o.id);
-    const tradeBtn = $('[data-open-trade]');
-    if (tradeBtn) tradeBtn.textContent = incoming.length ? `Trade · ${incoming.length} offer waiting` : 'Trade';
+    for (const button of $$('[data-open-trade]')) button.textContent = incoming.length ? `Trade · ${incoming.length} offer waiting` : 'Trade';
     if (fresh.length) window.dispatchEvent(new CustomEvent('dragonlink:chain', { detail: { state: 'ok', label: 'A trade offer arrived', url: null } }));
   }
   $('[data-incoming]').addEventListener('click', async e => {
@@ -531,12 +530,12 @@
 
   /* ── link status card ── */
   const card = $('[data-link-card]');
-  $('[data-open-trade]').addEventListener('click', openTrade);
+  for (const button of $$('[data-open-trade]')) button.addEventListener('click', openTrade);
   window.addEventListener('dragonlink:link', e => {
     const { linked, friend } = e.detail;
     card.toggleAttribute('data-linked', linked);
     $('[data-link-status]').textContent = linked ? `Linked with ${window.DLD?.friend?.name || friend}${window.DLD?.friend?.bot ? ', the club bot' : ''}` : 'Not linked';
-    $('[data-open-trade]').hidden = !linked;
+    for (const button of $$('[data-open-trade]')) button.hidden = !linked;
     if (linked) setTimeout(checkOffers, 500);
     if (!linked && room && chain()) { chain().room.leave(room.code).catch(() => {}); room = null; }
   });

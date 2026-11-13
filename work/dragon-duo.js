@@ -1154,6 +1154,29 @@ function startLink(friend){
   say(ember,'FINDING FRIEND…',1700);sfx('alert');
   updateHint('Looking for a nearby friend… Hold your console steady.');
 }
+const mobileLink=document.querySelector('.mobile-link');
+const mobileLinkScreen=mobileLink?.querySelector('canvas').getContext('2d');
+const mobileViewport=matchMedia('(max-width:900px)');
+let mobileLinkAt=0;
+function showMobileLink(show){
+  if(!mobileLink||mobileLink.hidden===!show)return;
+  mobileLink.hidden=!show;
+  document.body.classList.toggle('mobile-linked',show);
+  if(show)glacier.human=false;
+}
+mobileLink?.querySelectorAll('[data-mobile-key]').forEach(button=>{
+  button.addEventListener('click',()=>{if(docked)press(ember,Number(button.dataset.mobileKey));});
+});
+mobileLink?.querySelector('[data-mobile-battle]').addEventListener('click',()=>{
+  if(!docked||battle)return;
+  if(!ember.hatched){
+    mobileLink.querySelector('.mobile-link-hint').textContent='Hatch your dragon with the middle button to battle.';
+    mobileLink.querySelector('.mobile-link-hint').hidden=false;
+    return;
+  }
+  requestBattle();
+});
+mobileLink?.querySelector('[data-mobile-unlink]').addEventListener('click',()=>linkButton.click());
 function setDocked(value){
   if(value===docked)return;
   if(!value){glacier.human=false;if(battle)battle=null,setTrack('calm')}
@@ -1165,6 +1188,12 @@ function setDocked(value){
     d.page=null;d.shop=null;d.bag=false;d.status=null;if(d.game)d.game=null;setMood(d,value?'happy':'idle',value?1.5:0);
   }
   if(value){beamPower=.8;ringT=0;setTimeout(()=>emit(seamPos(),40,[0xff7a2a,0x2ad8ff,0xb7ff3a],2.4,.9,2),180)}
+  mobileLinkAt=performance.now()+750;
+  if(!value)showMobileLink(false);
+  if(value&&mobileLink){
+    mobileLink.querySelector('[data-mobile-link-status]').textContent='Linked with '+nm(glacier);
+    mobileLink.querySelector('.mobile-link-hint').hidden=true;
+  }
   linkButton.textContent=value?'Unlink':'Link with a friend';
   window.dispatchEvent(new CustomEvent('dragonlink:link',{detail:{linked:value,friend:nm(glacier),edition:glacier.edition}}));
   if(!value)selected=ember;
@@ -1540,6 +1569,20 @@ const frameFn=()=>{
 
   const t=nowMs/1000,now=clock();
   if(battle)tickBattle(now);
+  const mobileFocused=Boolean(mobileLink&&mobileViewport.matches&&docked&&nowMs>=mobileLinkAt);
+  showMobileLink(mobileFocused);
+  if(mobileFocused){
+    mobileLink.querySelector('.mobile-link-actions').hidden=Boolean(battle);
+    mobileLink.querySelector('[data-mobile-unlink]').hidden=Boolean(battle);
+    const battleHint=mobileLink.querySelector('.mobile-link-hint');
+    if(battle){
+      const message=battle.state==='win'||battle.state==='lose'
+        ?'Press the middle button to return.'
+        :'Match the arrows as they reach the ring. Your partner plays automatically.';
+      if(battleHint.textContent!==message)battleHint.textContent=message;
+      battleHint.hidden=false;
+    }else if(ember.hatched)battleHint.hidden=true;
+  }
   if(searchingUntil&&now>searchingUntil&&friendReady!==false){searchingUntil=0;setDocked(true)}
   const camZ=docked?Math.max(10,13.6/camera.aspect):Math.max(8.9,(camera.aspect<.9?8.1:10.2)/camera.aspect);
   const zt=zoomed?zoomTarget():null;
@@ -1575,7 +1618,10 @@ const frameFn=()=>{
     d.lampMat.emissive.setHex(lampOn?lampCol:0);
     d.lampMat.emissiveIntensity=lampOn?(.6+music.beatFlash*1.6+(d.attention?Math.max(0,Math.sin(t*8))*1.5:0)):0;
     d.lampGlow.material.color.setHex(lampCol);d.lampGlow.material.opacity=lampOn?.35+music.beatFlash*.5:0;
-    if(nowMs-d.lastDraw>50){d.lastDraw=nowMs;drawLCD(d,t,now)}
+    if(nowMs-d.lastDraw>(mobileFocused&&battle?16:50)){
+      d.lastDraw=nowMs;drawLCD(d,t,now);
+      if(mobileFocused&&d===ember)mobileLinkScreen.drawImage(d.ctx.canvas,0,0);
+    }
   }
   for(const d of devices){d.shadow.visible=d.group.visible;d.shadow.position.x=d.group.position.x;d.shadow.material.opacity=1-Math.min(.5,Math.abs(d.group.position.y)*2)}
   // particles
@@ -1597,7 +1643,7 @@ const frameFn=()=>{
   rim.intensity=2+music.beatFlash*1.5;rim2.intensity=2+music.beatFlash*1.5;
   shake=Math.max(0,shake-dt);
   camera.position.x=camBase.x+(Math.random()-.5)*shake*.6;camera.position.y=camBase.y+(Math.random()-.5)*shake*.6;
-  renderer.render(scene,camera);
+  if(!mobileFocused)renderer.render(scene,camera);
 };
 renderer.setAnimationLoop(frameFn);
 // debug/automation hook (used for QA screenshots)

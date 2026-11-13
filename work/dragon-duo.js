@@ -1161,6 +1161,15 @@ const mobileLCDToggle=mobileLink?.querySelector('[data-mobile-lcd]');
 let enlargedLCD=false;
 mobileLCDToggle?.addEventListener('click',()=>{enlargedLCD=!enlargedLCD;});
 const mobileViewport=matchMedia('(max-width:900px)');
+const rotatePrompt=document.querySelector('#link-rotate');
+const portraitPhone=matchMedia('(max-width:900px) and (orientation:portrait) and (pointer:coarse)');
+let rotatePromptPending=false;
+portraitPhone.addEventListener('change',()=>{
+  if(!portraitPhone.matches){
+    rotatePromptPending=false;
+    if(rotatePrompt?.open)rotatePrompt.close();
+  }
+});
 let mobileLinkAt=0;
 function showMobileLink(show){
   if(!mobileLink||mobileLink.hidden===!show)return;
@@ -1193,6 +1202,8 @@ function setDocked(value){
   }
   if(value){beamPower=.8;ringT=0;setTimeout(()=>emit(seamPos(),40,[0xff7a2a,0x2ad8ff,0xb7ff3a],2.4,.9,2),180)}
   mobileLinkAt=performance.now()+750;
+  rotatePromptPending=Boolean(value&&rotatePrompt&&portraitPhone.matches);
+  if(!value&&rotatePrompt?.open)rotatePrompt.close();
   if(!value){
     enlargedLCD=false;
     showMobileLink(false);
@@ -1579,6 +1590,10 @@ const frameFn=()=>{
   if(battle)tickBattle(now);
   const mobileFocused=Boolean(mobileLink&&mobileViewport.matches&&docked&&nowMs>=mobileLinkAt);
   showMobileLink(mobileFocused);
+  if(rotatePromptPending&&mobileFocused&&!document.querySelector('dialog[open]')){
+    rotatePromptPending=false;
+    rotatePrompt.showModal();
+  }
   const showLCD=mobileFocused&&(enlargedLCD||Boolean(battle));
   if(mobileLink && mobileLCD.hidden===showLCD){
     mobileLCD.hidden=!showLCD;

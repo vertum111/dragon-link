@@ -346,6 +346,15 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
   .modes{grid-template-columns:1fr}
   .row{grid-template-columns:90px 1fr auto}
 }
+#link-rotate{
+  position:fixed;inset:0;margin:0;width:100%;height:100%;max-width:none;max-height:none;
+  border:0;border-radius:0;text-align:center;padding:24px;overflow:auto
+}
+#link-rotate[open]{display:grid;place-items:center}
+.link-rotate-content{display:grid;justify-items:center;gap:16px;max-width:24rem}
+.link-rotate-phone{display:block;width:36px;height:60px;border:3px solid var(--sumi);
+  border-radius:7px;background:var(--pink);animation:link-phone-turn 2.4s ease-in-out infinite}
+@keyframes link-phone-turn{0%,20%{transform:rotate(0)}55%,85%{transform:rotate(90deg)}100%{transform:rotate(0)}}
 /* On narrow screens the linked session uses the same LCD at a readable size. */
 .mobile-link{display:none}
 @media (max-width:900px){
@@ -594,6 +603,14 @@ input[type=range]{width:100%;accent-color:var(--pink-text);height:28px}
   </div>
 </dialog>
 
+<dialog id="link-rotate" aria-labelledby="link-rotate-title" aria-describedby="link-rotate-tip">
+  <form class="link-rotate-content" method="dialog">
+    <span class="link-rotate-phone" aria-hidden="true"></span>
+    <h2 id="link-rotate-title">Rotate your phone</h2>
+    <p id="link-rotate-tip">Play in landscape for a better view of both consoles.</p>
+    <button class="btn quiet" type="submit" autofocus>Continue in portrait</button>
+  </form>
+</dialog>
 <dialog id="unlink-confirm" aria-labelledby="unlink-title">
   <div class="dlg-head"><h2 id="unlink-title">Unlink from your friend?</h2></div>
   <form class="pane actions" method="dialog">
